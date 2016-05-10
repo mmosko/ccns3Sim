@@ -62,6 +62,10 @@ namespace ccnx {
 /**
  * @ingroup ccnx-crypto
  *
+ * Simulated RSA keys for use in the simulated crypto suite.
+ *
+ * NOTE: NOT YET IMPLEMENTED
+ *
  */
 class CCNxKeysRsaSim
 {

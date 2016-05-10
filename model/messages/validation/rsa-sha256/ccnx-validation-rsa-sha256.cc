@@ -53,40 +53,67 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3_CCNXVALIDATION_H
-#define CCNS3_CCNXVALIDATION_H
+#include "ns3/ccnx-validation-rsa-sha256.h"
+#include "ns3/ccnx-crypto-suite.h"
+#include "ns3/ccnx-signer-rsa-factory.h"
+#include "ns3/ccnx-verifier-rsa-factory.h"
 
-#include "ns3/object.h"
-#include "ns3/ccnx-signer.h"
-#include "ns3/ccnx-verifier.h"
+using namespace ns3;
+using namespace ns3::ccnx;
 
-namespace ns3 {
-namespace ccnx {
+NS_OBJECT_ENSURE_REGISTERED (CCNxValidationRsaSha256);
 
-/**
- * \ingroup ccnx-messages
- *
- * Represents the Validation section of a CCNx message.
+/*
+ * Ensure that we register with the crypto suite data base
  */
-class CCNxValidation : public Object
+static struct CryptoSuiteCCNxValidationRsaSha256RegistrationClass
 {
-public:
-  static TypeId GetTypeId (void);
+  CryptoSuiteCCNxValidationRsaSha256RegistrationClass ()
+  {
+    ns3::TypeId tid = CCNxValidationRsaSha256::GetTypeId ();
+    CCNxCryptoSuite::CryptoSuiteType cryptoSuiteType = CCNxValidationRsaSha256::GetCryptoSuiteType ();
+    CCNxCryptoSuite::RegisterCryptoSuite (cryptoSuiteType, tid);
+  }
+} CryptoSuiteCCNxValidationRsaSha256RegistrationVariable;
 
-  CCNxValidation ();
-  virtual ~CCNxValidation ();
-
-  /**
-   * Returns the TypeId of this instance.  Because it is a virtual member, it will
-   * return the TypeId of the concrete class that implements CCNxValidation.
-   * @return The instance's TypeId
-   */
-  virtual TypeId GetInstanceTypeId (void) const = 0;
-  virtual Ptr<CCNxSigner> CreateSigner () = 0;
-  virtual Ptr<CCNxVerifier> CreateVerifier () = 0;
-};
-
-}
+TypeId
+CCNxValidationRsaSha256::GetTypeId ()
+{
+  static TypeId tid = TypeId ("ns3::ccnx::CCNxValidationRsaSha256")
+    .SetParent<CCNxValidation> ()
+    .SetGroupName ("CCNx");
+  return tid;
 }
 
-#endif //CCNS3_CCNXVALIDATION_H
+
+CCNxValidationRsaSha256::CCNxValidationRsaSha256 (Ptr<const CCNxKey> privateKey, Ptr<const CCNxKey> publicKey) :
+  m_privateKey (privateKey), m_publicKey (publicKey)
+{
+  // empty
+}
+
+CCNxValidationRsaSha256::~CCNxValidationRsaSha256 ()
+{
+  // empty
+}
+
+TypeId
+CCNxValidationRsaSha256::GetInstanceTypeId (void) const
+{
+  return CCNxValidationRsaSha256::GetTypeId ();
+}
+
+Ptr<CCNxSigner>
+CCNxValidationRsaSha256::CreateSigner ()
+{
+  return CCNxSignerRsaFactory::CreateSigner (m_privateKey, m_publicKey);
+}
+
+Ptr<CCNxVerifier>
+CCNxValidationRsaSha256::CreateVerifier ()
+{
+  Ptr<CCNxVerifier> verifier = CCNxVerifierRsaFactory::CreateVerifier ();
+  verifier->AddKey (m_publicKey);
+  return verifier;
+}
+

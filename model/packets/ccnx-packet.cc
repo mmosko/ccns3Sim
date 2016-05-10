@@ -54,8 +54,8 @@
  */
 
 #include "ns3/tag.h"
-#include "ns3/ccnx-packet.h"
 #include "ns3/log.h"
+#include "ccnx-packet.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
@@ -92,16 +92,27 @@ CCNxPacket::CreateFromMessage (Ptr<CCNxMessage> message)
 }
 
 Ptr<CCNxPacket>
-CCNxPacket::CreateFromMessage (Ptr<CCNxMessage> message, Ptr<CCNxValidation> validation)
+CCNxPacket::CreateFromMessage (Ptr<CCNxMessage> message, Ptr<CCNxValidationAlgorithm> validationAlgorithm,
+                               Ptr<CCNxValidationPayload> validationPayload)
 {
   // We cannot use Create<CCNxPacket>() because the call to the protected method needs to be here.
   Ptr<CCNxPacket> packet = Ptr<CCNxPacket> (new CCNxPacket (), false);
   packet->m_message = message;
-  packet->m_validation = validation;
+  packet->m_validationAlgorithm = validationAlgorithm;
   packet->m_codecFixedHeader.SetHeader (packet->GenerateFixedHeader (message->GetMessageType ()));
   packet->m_ns3Packet = 0;
   return packet;
 }
+
+
+Ptr<CCNxPacket>
+CCNxPacket::CreateFromMessage (Ptr<CCNxMessage> message, Ptr<CCNxSigner> signer)
+{
+  // FIXME
+  return CreateFromMessage (message);
+}
+
+
 
 Ptr<CCNxPacket>
 CCNxPacket::CreateFromNs3Packet (Ptr<const Packet> ns3Packet)
@@ -151,10 +162,10 @@ CCNxPacket::GetMessage () const
   return m_message;
 }
 
-Ptr<CCNxValidation>
-CCNxPacket::GetValidation () const
+Ptr<CCNxValidationAlgorithm>
+CCNxPacket::GetValidationAlgorithm () const
 {
-  return m_validation;
+  return m_validationAlgorithm;
 }
 
 CCNxPerHopHeader
@@ -386,6 +397,7 @@ ns3::ccnx::operator<< (std::ostream &os, CCNxPacket const &packet)
 {
   os << "header " << *packet.GetFixedHeader ()
      << ", message " << *packet.GetMessage ()
-     << ", validation " << packet.GetValidation ();
+     << ", validation " << packet.GetValidationAlgorithm ();
   return os;
 }
+

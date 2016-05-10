@@ -61,12 +61,14 @@
 #include "ns3/packet.h"
 #include "ns3/ccnx-fixedheader.h"
 #include "ns3/ccnx-message.h"
-#include "ns3/ccnx-validation.h"
+#include "ns3/ccnx-validation-algorithm.h"
+#include "ns3/ccnx-validation-payload.h"
 #include "ns3/ccnx-hash-value.h"
 
 #include "ns3/ccnx-codec-fixedheader.h"
 #include "ns3/ccnx-codec-interest.h"
 #include "ns3/ccnx-codec-contentobject.h"
+#include "ns3/ccnx-signer.h"
 #include "ns3/ccnx-codec-perhopheader.h"
 
 namespace ns3 {
@@ -107,7 +109,31 @@ class CCNxPacket : public SimpleRefCount<CCNxPacket>
 {
 public:
   static Ptr<CCNxPacket> CreateFromMessage (Ptr<CCNxMessage> message);
-  static Ptr<CCNxPacket> CreateFromMessage (Ptr<CCNxMessage> message, Ptr<CCNxValidation> validation);
+
+  /**
+   * Create a packet from a CCNxMessage and a pre-encoded validation section.
+   *
+   * This is typically used when decoding a packet from wire format.
+   *
+   * @param message
+   * @param validation
+   * @return
+   */
+  static Ptr<CCNxPacket> CreateFromMessage (Ptr<CCNxMessage> message, Ptr<CCNxValidationAlgorithm> validationAlgorithm,
+                                            Ptr<CCNxValidationPayload> validationPayload);
+
+
+  /**
+   * Create a CCNx packet with a message and a signer.  The signer will be used to generate a
+   * `CCNxValidation` section for the packet during the encoding.
+   *
+   * This is typically used when creating a packet at the origin.
+   *
+   * @param message
+   * @param signer
+   * @return
+   */
+  static Ptr<CCNxPacket> CreateFromMessage (Ptr<CCNxMessage> message, Ptr<CCNxSigner> signer);
 
   /**
    * Deserialize the packet and instantiate the CCNx objects.
@@ -120,7 +146,7 @@ public:
 
   Ptr<CCNxMessage> GetMessage () const;
 
-  Ptr<CCNxValidation> GetValidation () const;
+  Ptr<CCNxValidationAlgorithm> GetValidationAlgorithm () const;
 
   CCNxPerHopHeader GetPerhopHeaders() const;
 
@@ -185,7 +211,9 @@ protected:
   CCNxCodecPerHopHeader m_codecPerHopHeader;
 
   Ptr<CCNxMessage> m_message;
-  Ptr<CCNxValidation> m_validation;
+  Ptr<CCNxValidationAlgorithm> m_validationAlgorithm;
+  Ptr<CCNxValidationPayload> m_validationPayload;
+
   Ptr<Packet> m_ns3Packet;
   CCNxHashValue m_hash;                              //<! virtual PacketTag for ContentObjectHash
 };

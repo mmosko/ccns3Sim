@@ -53,60 +53,23 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_MODEL_VALIDATION_VALIDATION_RSA_SHA256_H_
-#define CCNS3SIM_MODEL_VALIDATION_VALIDATION_RSA_SHA256_H_
+#include "ns3/ccnx-validation-algorithm.h"
 
-#include "ns3/ccnx-validation.h"
-#include "ns3/ccnx-key.h"
-namespace ns3 {
-namespace ccnx {
+using namespace ns3;
+using namespace ns3::ccnx;
 
-class CCNxValidationRsaSha256 : public CCNxValidation
+NS_OBJECT_ENSURE_REGISTERED (CCNxValidationAlgorithm);
+
+TypeId
+CCNxValidationAlgorithm::GetTypeId (void)
 {
-public:
-  static TypeId GetTypeId (void);
+  static TypeId tid = TypeId ("ns3::ccnx::CCNxValidationAlgorithm")
+    .SetParent<Object> ()
+    .SetGroupName ("CCNx");
+  return tid;
+}
 
-  /**
-   * Creates a CCNxValidation based on RSA-SHA256 with a new keypair.
-   * If CCNxCrypto::SetMode() is Simulated, then there are no real keys used.  If it is
-   * set to Implemented, then we use an actual crypto system.
-   *
-   * The function is currently hard-coded to use a 2048 bit key.
-   *
-   * TODO: Allow multiple key sizes
-   * @return
-   */
-  static Ptr<CCNxValidationRsaSha256> CreateWithNewKeypair ();
-
-  CCNxValidationRsaSha256 (Ptr<const CCNxKey> privateKey, Ptr<const CCNxKey> publicKey);
-
-  virtual ~CCNxValidationRsaSha256 ();
-
-  /**
-   * Returns the TypeId of the concrete class implementing CCNxValidation.  In this
-   * case, it will be "ns3::ccnx::CCNxValidationRsaSha256".
-   * @return
-   */
-  virtual TypeId GetInstanceTypeId (void) const;
-
-  /**
-   * Returns a signer that uses this validator's keypair
-   * @return
-   */
-  virtual Ptr<CCNxSigner> CreateSigner ();
-
-  /**
-   * Returns a verifier that uses this validator's keypair.
-   * @return
-   */
-  virtual Ptr<CCNxVerifier> CreateVerifier ();
-
-private:
-  Ptr<const CCNxKey> m_privateKey;
-  Ptr<const CCNxKey> m_publicKey;
-};
-
-}   /* namespace ccnx */
-} /* namespace ns3 */
-
-#endif /* CCNS3SIM_MODEL_VALIDATION_VALIDATION_RSA_SHA256_H_ */
+CCNxValidationAlgorithm::~CCNxValidationAlgorithm ()
+{
+  // empty
+}

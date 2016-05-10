@@ -56,24 +56,59 @@
 #ifndef CCNS3SIM_MODEL_CRYPTO_CCNX_CRYPTO_SUITE_H_
 #define CCNS3SIM_MODEL_CRYPTO_CCNX_CRYPTO_SUITE_H_
 
-#include <ostream>
+#include <map>
+
+#include "ns3/type-id.h"
 
 namespace ns3 {
 namespace ccnx {
 
-/**
- * @ingroup ccnx-crypto
- *
- */
-typedef enum
-{
-  CCNxCryptoSuite_None,      //!< CCNxCryptoSuite_None
-  CCNxCryptoSuite_RsaSha256, //!< CCNxCryptoSuite_RsaSha256
-  CCNxCryptoSuite_HmacSha256,//!< CCNxCryptoSuite_HmacSha256
-  CCNxCryptoSuite_CRC32C     //!< CCNxCryptoSuite_CRC32C
-} CCNxCryptoSuite;
 
-std::ostream & operator << (std::ostream &os, CCNxCryptoSuite suite);
+/**
+ * @ingroup ccnx-messages
+ *
+ * Each crypto suite class registers with this class so we can provide a central repository
+ * for encoders/decoders.
+ *
+ * In particular for decoding a packet, based on the CyptoSuite in the packet, this class can
+ * provide the concrete implementation for decoding the `CCNxValidation` section.
+ */
+class CCNxCryptoSuite
+{
+public:
+  typedef uint16_t CryptoSuiteType;
+
+  /**
+   * Registers a `CCNxValidation` run time type with a CryptoSuiteType (from the standard or
+   * from the reserved values for experimentation).
+   *
+   * @param cryptoSuiteType
+   * @param validationType
+   * @return true If the cryptoSuiteType is unique
+   * @return false If the cryptoSuiteType is a duplicate (not re-registered)
+   */
+  static bool RegisterCryptoSuite (const CryptoSuiteType cryptoSuiteType, TypeId validationType);
+
+  /**
+   * Removes a given crypto suite type from the mapping.  It is ok to call this even
+   * if the cryptoSuiteType is not registered, it is just a no-op.
+   *
+   * @param cryptoSuiteType The crypto suite to remove
+   */
+  static void UnregisterCryptoSuite (const CryptoSuiteType cryptoSuiteType);
+
+  /**
+   * The `cryptoSuiteType` is carried in each `CCNxValidationAlgorithm` section.
+   *
+   * @param cryptoSuiteType
+   * @return
+   */
+//  static TypeId LookupCryptoSuite (CryptoSuiteType cryptoSuiteType);
+
+private:
+  typedef std::map<CryptoSuiteType, TypeId> SuiteMapType;
+  static SuiteMapType m_globalRegistry;
+};
 
 }   /* namespace ccnx */
 } /* namespace ns3 */

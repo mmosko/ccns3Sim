@@ -62,6 +62,7 @@
 #include "ns3/ccnx-hasher.h"
 #include "ns3/ccnx-signature.h"
 #include "ns3/ccnx-key.h"
+#include "ns3/ccnx-keyid.h"
 
 namespace ns3 {
 namespace ccnx {
@@ -118,9 +119,10 @@ public:
    * @param [in] packetSignature The signature in the packet to verify
    * @return
    */
-  virtual bool Verify (Ptr<CCNxHashValue> keyid, Ptr<CCNxHashValue> computedDigest,
+  virtual bool Verify (Ptr<const CCNxKeyId> keyid,
+                       Ptr<const CCNxHashValue> computedDigest,
                        CCNxCryptoSuite packetCryptoSuite,
-                       Ptr<CCNxSignature> packetSignature) = 0;
+                       Ptr<const CCNxSignature> packetSignature) = 0;
 
 };
 

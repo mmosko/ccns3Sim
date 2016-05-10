@@ -61,12 +61,14 @@
 
 namespace ns3 {
 namespace ccnx {
-
 /**
  * @ingroup ccnx-crypto
  *
  * The CCNxSignerRsaFactory creates RSA signers of a given implementation.  Set the
  * implementation via CCNxCrypto::SetMode(), then start creating signers.
+ *
+ * NOTE: NOT YET IMPLEMENTED
+ *
  */
 class CCNxSignerRsaFactory
 {

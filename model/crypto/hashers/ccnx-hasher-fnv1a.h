@@ -64,6 +64,7 @@ namespace ccnx {
 /**
  * @ingroup ccnx-crypto
  *
+ *
  */
 class CCNxHasherFnv1a : public CCNxHasher
 {

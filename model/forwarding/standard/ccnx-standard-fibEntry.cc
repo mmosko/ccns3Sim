@@ -59,7 +59,6 @@
 #include "ns3/assert.h"
 #include "ns3/object.h"
 
-
 using namespace ns3;
 using namespace ns3::ccnx;
 

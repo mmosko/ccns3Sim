@@ -69,8 +69,7 @@ CCNxSignature::GetTypeId ()
   return tid;
 }
 
-
-CCNxSignature::CCNxSignature ()
+CCNxSignature::CCNxSignature (Ptr<const CCNxByteArray> bytes) : m_signature (bytes)
 {
   // empty
 }
@@ -78,4 +77,16 @@ CCNxSignature::CCNxSignature ()
 CCNxSignature::~CCNxSignature ()
 {
   // empty
+}
+
+Ptr<const CCNxByteArray>
+CCNxSignature::GetSignature () const
+{
+  return m_signature;
+}
+
+bool
+CCNxSignature::Equals (const CCNxSignature &other) const
+{
+  return *m_signature == *other.m_signature;
 }

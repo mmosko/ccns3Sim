@@ -67,6 +67,9 @@ namespace ccnx {
  *
  * The CCNxVerifierRsaFactory creates RSA signers of a given implementation.  Set the
  * implementation via CCNxCrypto::SetMode(), then start creating hashers.
+ *
+ * NOTE: NOT YET IMPLEMENTED
+ *
  */
 class CCNxHasherSha256Factory
 {

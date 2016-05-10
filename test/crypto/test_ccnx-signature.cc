@@ -65,8 +65,25 @@ namespace TestSuiteCCNxSignature {
 
 BeginTest (Constructor)
 {
+  const uint8_t data[] = { 1, 2, 3, 4 };
+
+  Ptr<CCNxByteArray> bytes = Create<CCNxByteArray> (sizeof(data), data);
+  Ptr<CCNxSignature> sig = CreateObject<CCNxSignature> (bytes);
+  bool ok = (sig);
+  NS_TEST_EXPECT_MSG_EQ (ok, true, "Got null signature from CreateObject");
 }
 EndTest ()
+
+BeginTest (GetSignature)
+{
+}
+EndTest ()
+
+BeginTest (Equals)
+{
+}
+EndTest ()
+
 
 /**
  * @ingroup ccnx-test
@@ -79,6 +96,8 @@ public:
   TestSuiteCCNxSignature () : TestSuite ("ccnx-signature", UNIT)
   {
     AddTestCase (new Constructor (), TestCase::QUICK);
+    AddTestCase (new GetSignature (), TestCase::QUICK);
+    AddTestCase (new Equals (), TestCase::QUICK);
   }
 } g_TestSuiteCCNxSignature;
 

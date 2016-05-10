@@ -89,14 +89,17 @@ def build(bld):
         'model/messages/ccnx-contentobject.cc',
         'model/messages/ccnx-fixedheader.cc',
         'model/messages/ccnx-interest.cc',
+        'model/messages/ccnx-interestlifetime.cc',
         'model/messages/ccnx-message.cc',
         'model/messages/ccnx-name.cc',
         'model/messages/ccnx-name-builder.cc',
         'model/messages/ccnx-namesegment.cc',
-        'model/messages/ccnx-time.cc',
-        'model/messages/ccnx-perhopheaderentry.cc',
-        'model/messages/ccnx-interestlifetime.cc',
         'model/messages/ccnx-perhopheader.cc',
+        'model/messages/ccnx-perhopheaderentry.cc',
+        'model/messages/ccnx-time.cc',
+        'model/messages/ccnx-validation-algorithm.cc',
+        'model/messages/ccnx-validation-payload.cc',
+        'model/messages/validation/publickey/ccnx-validation-publickey.cc',
         # Crypto
         'model/crypto/ccnx-crypto.cc',
         'model/crypto/ccnx-crypto-suite.cc',
@@ -115,11 +118,7 @@ def build(bld):
         'model/crypto/signers/ccnx-signer-rsa-factory.cc',
         'model/crypto/signers/ccnx-signer-rsa-sim.cc',
         'model/crypto/verifiers/ccnx-verifier-rsa-factory.cc',
-        'model/crypto/verifiers/ccnx-verifier-rsa-sim.cc',        
- 
-        # Validation
-        'model/validation/ccnx-validation.cc',
-        'model/validation/rsa-sha256/ccnx-validation-rsa-sha256.cc',
+        'model/crypto/verifiers/ccnx-verifier-rsa-sim.cc',         
         # node
         'model/node/ccnx-connection.cc',
         'model/node/ccnx-connection-list.cc',
@@ -226,6 +225,9 @@ def build(bld):
         'model/messages/ccnx-name-builder.h',
         'model/messages/ccnx-namesegment.h',
         'model/messages/ccnx-time.h',
+        'model/messages/ccnx-validation-algorithm.h',
+        'model/messages/ccnx-validation-payload.h',
+        'model/messages/validation/publickey/ccnx-validation-publickey.h',
         # Crypto
         'model/crypto/ccnx-crypto.h',
         'model/crypto/ccnx-crypto-suite.h',
@@ -245,9 +247,6 @@ def build(bld):
         'model/crypto/signers/ccnx-signer-rsa-sim.h',        
         'model/crypto/verifiers/ccnx-verifier-rsa-factory.h',
         'model/crypto/verifiers/ccnx-verifier-rsa-sim.h',        
-        # Validation
-        'model/validation/ccnx-validation.h',
-        'model/validation/rsa-sha256/ccnx-validation-rsa-sha256.h',
         # node
         'model/node/ccnx-connection.h',
         'model/node/ccnx-connection-list.h',

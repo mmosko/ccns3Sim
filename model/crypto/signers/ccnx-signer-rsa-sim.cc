@@ -91,11 +91,11 @@ CCNxSignerRsaSim::~CCNxSignerRsaSim ()
  * Return the KeyId that identifies this signer.
  * @return
  */
-Ptr<const CCNxHashValue>
+Ptr<const CCNxKeyId>
 CCNxSignerRsaSim::GetKeyId ()
 {
   // FIXME
-  return Ptr<const CCNxHashValue> (0);
+  return Ptr<const CCNxKeyId> (0);
 }
 
 Ptr<const CCNxKey>

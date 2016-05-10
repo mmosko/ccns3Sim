@@ -56,6 +56,7 @@
 #ifndef CCNS3SIM_MODEL_ROUTING_NFP_NFP_PREFIX_TIMER_HEAP_H_
 #define CCNS3SIM_MODEL_ROUTING_NFP_NFP_PREFIX_TIMER_HEAP_H_
 
+#include <deque>
 #include <queue>
 #include <map>
 

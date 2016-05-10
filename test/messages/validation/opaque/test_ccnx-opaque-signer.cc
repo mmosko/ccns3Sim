@@ -53,62 +53,33 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#include "ns3/ccnx-validation-rsa-sha256.h"
+#include "ns3/test.h"
+#include "ns3/ccnx-opaque-signer.h"
 
-#include "ns3/ccnx-signer-rsa-factory.h"
-#include "ns3/ccnx-verifier-rsa-factory.h"
+#include "../../TestMacros.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
 
-NS_OBJECT_ENSURE_REGISTERED (CCNxValidationRsaSha256);
+namespace TestSuiteCCNxOpaqueSigner {
 
-TypeId
-CCNxValidationRsaSha256::GetTypeId (void)
+BeginTest (Constructor)
 {
-  static TypeId tid = TypeId ("ns3::ccnx::CCNxValidationRsaSha256")
-    .SetParent<CCNxValidation> ()
-    .SetGroupName ("CCNx");
-  return tid;
 }
+EndTest ()
 
-Ptr<CCNxValidationRsaSha256>
-CCNxValidationRsaSha256::CreateWithNewKeypair ()
+/**
+ * @ingroup ccnx-test
+ *
+ * Test Suite for CCNxOpaqueSigner
+ */
+static class TestSuiteCCNxOpaqueSigner : public TestSuite
 {
-  // TODO: Generate the actual keys
-  Ptr<CCNxKey> privateKey = Ptr<CCNxKey> (0);
-  Ptr<CCNxKey> publicKey = Ptr<CCNxKey> (0);
-  return Create<CCNxValidationRsaSha256> (publicKey, privateKey);
-}
+public:
+  TestSuiteCCNxOpaqueSigner () : TestSuite ("ccnx-opaque-signer", UNIT)
+  {
+    AddTestCase (new Constructor (), TestCase::QUICK);
+  }
+} g_TestSuiteCCNxOpaqueSigner;
 
-CCNxValidationRsaSha256::CCNxValidationRsaSha256 (Ptr<const CCNxKey> privateKey, Ptr<const CCNxKey> publicKey) :
-  m_privateKey (privateKey), m_publicKey (publicKey)
-{
-  // empty
-}
-
-CCNxValidationRsaSha256::~CCNxValidationRsaSha256 ()
-{
-  // empty
-}
-
-TypeId
-CCNxValidationRsaSha256::GetInstanceTypeId (void) const
-{
-  return CCNxValidationRsaSha256::GetTypeId ();
-}
-
-Ptr<CCNxSigner>
-CCNxValidationRsaSha256::CreateSigner ()
-{
-  return CCNxSignerRsaFactory::CreateSigner (m_privateKey, m_publicKey);
-}
-
-Ptr<CCNxVerifier>
-CCNxValidationRsaSha256::CreateVerifier ()
-{
-  Ptr<CCNxVerifier> verifier = CCNxVerifierRsaFactory::CreateVerifier ();
-  verifier->AddKey (m_publicKey);
-  return verifier;
-}
-
+} // namespace TestSuiteCCNxOpaqueSigner

@@ -98,9 +98,10 @@ CCNxVerifierRsaSim::GetSignatureHasher ()
 }
 
 bool
-CCNxVerifierRsaSim::Verify (Ptr<CCNxHashValue> keyid, Ptr<CCNxHashValue> computedDigest,
+CCNxVerifierRsaSim::Verify (Ptr<const CCNxKeyId> keyid,
+                            Ptr<const CCNxHashValue> computedDigest,
                             CCNxCryptoSuite packetCryptoSuite,
-                            Ptr<CCNxSignature> packetSignature)
+                            Ptr<const CCNxSignature> packetSignature)
 {
 // FIXME
   return false;

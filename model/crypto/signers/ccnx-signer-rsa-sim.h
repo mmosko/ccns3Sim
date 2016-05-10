@@ -61,7 +61,6 @@
 
 namespace ns3 {
 namespace ccnx {
-
 /**
  * @ingroup ccnx-crypto
  *
@@ -84,6 +83,8 @@ public:
    * We would normally make this protected, but the way NS3 uses ns3::CreateObject<>() does not
    * allow us to make the constructor private in a way that only the factory can call.
    *
+   * NOTE: NOT YET IMPLEMENTED
+   *
    * @param privateKey
    * @param publicKey
    */
@@ -93,7 +94,7 @@ public:
    * Return the KeyId that identifies this signer.
    * @return
    */
-  virtual Ptr<const CCNxHashValue> GetKeyId ();
+  virtual Ptr<const CCNxKeyId> GetKeyId ();
 
   virtual Ptr<const CCNxKey> GetDerEncodedPublicKey ();
 

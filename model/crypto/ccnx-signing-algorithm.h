@@ -70,7 +70,8 @@ typedef enum
   CCNxSigningAlgorithm_None,
   CCNxSigningAlgorithm_RSA,
   CCNxSigningAlgorithm_HMAC,
-  CCNxSigningAlgorithm_CRC32C
+  CCNxSigningAlgorithm_CRC32C,
+  CCNxSigningAlgorithm_Opaque
 } CCNxSigningAlgorithm;
 
 std::ostream & operator << (std::ostream &s, CCNxSigningAlgorithm alg);

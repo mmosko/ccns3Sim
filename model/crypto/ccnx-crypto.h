@@ -71,7 +71,6 @@ namespace ccnx {
 
 /**
  * @ingroup ccnx-crypto
- *
  * The CCNxCrypto class sets the implementation type for the cryptography and does
  * any necessary global setup.
  *
@@ -79,6 +78,12 @@ namespace ccnx {
  * mode, no actual cryptographic functions are used.  We emulate the cryptography so
  * it will behave the same, but is insecure.  In Implemented mode, we use actual
  * cryptographic functions (e.g. OpenSSL).
+ *
+ * Note that there is also the class `CCNxValidationOpaque` that uses opaque values
+ * for all the cryptographic fields, so an application can manage all keys, keyids, and signatures.
+ * It does not use any of the simulated / real crypto functions defined in model/crypto.
+ *
+ * @see CCNxValidationOpaque
  */
 class CCNxCrypto
 {

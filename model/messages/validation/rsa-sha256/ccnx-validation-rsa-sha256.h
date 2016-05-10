@@ -53,35 +53,46 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#include "ccnx-validation.h"
+#ifndef CCNS3SIM_MODEL_VALIDATION_VALIDATION_RSA_SHA256_H_
+#define CCNS3SIM_MODEL_VALIDATION_VALIDATION_RSA_SHA256_H_
 
-using namespace ns3;
-using namespace ns3::ccnx;
+#include "ns3/ccnx-validation-publickey.h"
 
-NS_OBJECT_ENSURE_REGISTERED (CCNxValidation);
 
-TypeId
-CCNxValidation::GetTypeId (void)
+namespace ns3 {
+namespace ccnx {
+
+class CCNxValidationRsaSha256 : public CCNxValidation
 {
-  static TypeId tid = TypeId ("ns3::ccnx::CCNxValidation")
-    .SetParent<Object> ()
-    .SetGroupName ("CCNx");
-  return tid;
-}
+public:
+  static TypeId GetTypeId (void);
 
-TypeId
-CCNxValidation::GetInstanceTypeId (void) const
-{
-  return CCNxValidation::GetTypeId ();
-}
+  static CCNxCryptoSuite::CryptoSuiteType GetCryptoSuiteType ();
+
+  /**
+   * Minimum constructor for RSA-SHA256: you must have a keyid and a signature.
+   *
+   * @param keyId
+   * @param signature
+   */
+  CCNxValidationRsaSha256 (Ptr<const CCNxKeyId> keyId, Ptr<const CCNxSignature> signature);
+
+  virtual ~CCNxValidationRsaSha256 ();
+
+  /**
+   * Returns the TypeId of the concrete class implementing CCNxValidation.  In this
+   * case, it will be "ns3::ccnx::CCNxValidationRsaSha256".
+   * @return
+   */
+  virtual TypeId GetInstanceTypeId (void) const;
 
 
-CCNxValidation::CCNxValidation ()
-{
-  // empty
-}
+private:
+  static uint16_t m_cryptoSuiteType;
+};
 
-CCNxValidation::~CCNxValidation ()
-{
-  // empty
-}
+}   /* namespace ccnx */
+} /* namespace ns3 */
+
+#endif /* CCNS3SIM_MODEL_VALIDATION_VALIDATION_RSA_SHA256_H_ */
+

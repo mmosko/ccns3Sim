@@ -57,6 +57,7 @@
 #define CCNS3SIM_MODEL_VALIDATION_CCNX_SIGNATURE_H_
 
 #include "ns3/object.h"
+#include "ns3/ccnx-byte-array.h"
 
 namespace ns3 {
 namespace ccnx {
@@ -64,14 +65,25 @@ namespace ccnx {
 /**
  * @ingroup ccnx-crypto
  *
+ * Container for a signature (or more generally the output of the validation algorithm, it
+ * could be a MAC, MIC, or public key signature).
+ *
+ * The enclosed byte array only has meaning to the algorithm that signs and verifies
+ * the signature.
  */
 class CCNxSignature : public Object
 {
 public:
   static TypeId GetTypeId ();
 
-  CCNxSignature ();
+  CCNxSignature (Ptr<const CCNxByteArray> bytes);
   virtual ~CCNxSignature ();
+
+  virtual Ptr<const CCNxByteArray> GetSignature () const;
+  virtual bool Equals (const CCNxSignature &other) const;
+
+protected:
+  Ptr<const CCNxByteArray> m_signature;
 };
 
 }   /* namespace ccnx */

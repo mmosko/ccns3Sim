@@ -65,8 +65,7 @@ namespace ccnx {
 /**
  * @ingroup ccnx-crypto
  *
- * Represents a cryptographic key.  May be either a public/private key
- * or a symmetric key.
+ *
  */
 class CCNxKey : public SimpleRefCount<CCNxKey>
 {

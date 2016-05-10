@@ -65,6 +65,7 @@ namespace ccnx {
 /**
  * @ingroup ccnx-crypto
  *
+ *
  */
 class CCNxVerifierRsaSim : public CCNxVerifier
 {
@@ -81,6 +82,8 @@ public:
    *
    * We would normally make this protected, but the way NS3 uses ns3::CreateObject<>() does not
    * allow us to make the constructor private in a way that only the factory can call.
+   *
+   * NOTE: NOT YET IMPLEMENTED
    *
    * @param privateKey
    * @param publicKey
@@ -126,9 +129,10 @@ public:
    * @param [in] packetSignature The signature in the packet to verify
    * @return
    */
-  virtual bool Verify (Ptr<CCNxHashValue> keyid, Ptr<CCNxHashValue> computedDigest,
+  virtual bool Verify (Ptr<const CCNxKeyId> keyid,
+                       Ptr<const CCNxHashValue> computedDigest,
                        CCNxCryptoSuite packetCryptoSuite,
-                       Ptr<CCNxSignature> packetSignature);
+                       Ptr<const CCNxSignature> packetSignature);
 
 protected:
   Ptr<const CCNxKey> m_publicKey;

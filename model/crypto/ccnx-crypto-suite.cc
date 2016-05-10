@@ -55,3 +55,27 @@
 
 #include "ns3/ccnx-crypto-suite.h"
 
+using namespace ns3;
+using namespace ns3::ccnx;
+
+CCNxCryptoSuite::SuiteMapType CCNxCryptoSuite::m_globalRegistry;
+
+bool
+CCNxCryptoSuite::RegisterCryptoSuite (const CryptoSuiteType cryptoSuiteType, TypeId validationType)
+{
+  bool inserted = false;
+  SuiteMapType::const_iterator i = m_globalRegistry.find (cryptoSuiteType);
+  if (i == m_globalRegistry.end ())
+    {
+      m_globalRegistry[cryptoSuiteType] = validationType;
+      inserted = true;
+    }
+  return inserted;
+}
+
+void
+CCNxCryptoSuite::UnregisterCryptoSuite (const CryptoSuiteType cryptoSuiteType)
+{
+  m_globalRegistry.erase (cryptoSuiteType);
+}
+

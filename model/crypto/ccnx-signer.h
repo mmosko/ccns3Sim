@@ -63,12 +63,14 @@
 #include "ns3/ccnx-hash-value.h"
 #include "ns3/ccnx-hasher.h"
 #include "ns3/ccnx-key.h"
+#include "ns3/ccnx-keyid.h"
 
 namespace ns3 {
 namespace ccnx {
 
 /**
  * @ingroup ccnx-crypto
+ *
  *
  */
 class CCNxSigner : public Object
@@ -85,7 +87,7 @@ public:
    * Return the KeyId that identifies this signer.
    * @return
    */
-  virtual Ptr<const CCNxHashValue> GetKeyId () = 0;
+  virtual Ptr<const CCNxKeyId> GetKeyId () = 0;
 
   virtual Ptr<const CCNxKey> GetDerEncodedPublicKey () = 0;
 
