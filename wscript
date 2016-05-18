@@ -113,8 +113,6 @@ def build(bld):
         'model/crypto/ccnx-signer.cc',
         'model/crypto/ccnx-verifier.cc',
         'model/crypto/hashers/ccnx-hasher-fnv1a.cc',
-        # Validation
-        'model/validation/ccnx-validation.cc',
         # node
         'model/node/ccnx-connection.cc',
         'model/node/ccnx-connection-list.cc',
