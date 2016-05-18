@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -59,6 +59,8 @@
 #include "ns3/object-factory.h"
 #include "ns3/ccnx-routing-helper.h"
 #include "ns3/node-container.h"
+#include "ns3/nfp-computation-cost.h"
+#include "ns3/nfp-stats.h"
 
 namespace ns3 {
 namespace ccnx {
@@ -131,6 +133,24 @@ public:
   static void PrintComputationCostAllNodesWithDelay (Time printDelay, Ptr<OutputStreamWrapper> stream);
   static void PrintComputationCostWithDelay (Time printDelay, Ptr<OutputStreamWrapper> stream, Ptr<Node> node);
   static void PrintComputationCost (Ptr<OutputStreamWrapper> stream, Ptr<Node> node);
+
+  /**
+   * Retrieve the computation cost associated with NFP from the specified node.
+   *
+   * This will fetch the aggregated instance of NfpRoutingProtocol from the node
+   * and return its computation cost.
+   *
+   * @param node [in] The node to lookup
+   */
+  static NfpComputationCost GetComputationCost( Ptr<Node> node );
+
+  /**
+   * Returns the routing statistics from time 0 to now.
+   *
+   * @param node [in] The node to lookup
+   * @return
+   */
+  static NfpStats GetStats( Ptr<Node> node );
 
 private:
   /**

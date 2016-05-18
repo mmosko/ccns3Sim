@@ -39,8 +39,8 @@
 # # media, etc) that they have contributed directly to this software.
 # #
 # # There is no guarantee that this section is complete, up to date or accurate. It
-# # is up to the contributors to maintain their section in this file up to date
-# # and up to the user of the software to verify any claims herein.
+# # is up to the contributors to maintain their portion of this section and up to
+# # the user of the software to verify any claims herein.
 # #
 # # Do not remove this header notification.  The contents of this section must be
 # # present in all distributions of the software.  You may only modify your own
@@ -113,12 +113,8 @@ def build(bld):
         'model/crypto/ccnx-signer.cc',
         'model/crypto/ccnx-verifier.cc',
         'model/crypto/hashers/ccnx-hasher-fnv1a.cc',
-        'model/crypto/hashers/ccnx-hasher-sha256-factory.cc',
-        'model/crypto/hashers/ccnx-hasher-sha256-sim.cc',
-        'model/crypto/signers/ccnx-signer-rsa-factory.cc',
-        'model/crypto/signers/ccnx-signer-rsa-sim.cc',
-        'model/crypto/verifiers/ccnx-verifier-rsa-factory.cc',
-        'model/crypto/verifiers/ccnx-verifier-rsa-sim.cc',         
+        # Validation
+        'model/validation/ccnx-validation.cc',
         # node
         'model/node/ccnx-connection.cc',
         'model/node/ccnx-connection-list.cc',
@@ -138,6 +134,7 @@ def build(bld):
         'model/forwarding/ccnx-fib.cc',
         'model/forwarding/ccnx-pit.cc',
         'model/forwarding/standard/ccnx-standard-content-store.cc',
+        'model/forwarding/standard/ccnx-standard-content-store-lruList.cc',
         'model/forwarding/standard/ccnx-standard-content-store-entry.cc',
         'model/forwarding/standard/ccnx-standard-content-store-factory.cc',
         'model/forwarding/standard/ccnx-standard-fib.cc',
@@ -161,6 +158,7 @@ def build(bld):
         'model/routing/nfp/nfp-prefix-timer-entry.cc',
         'model/routing/nfp/nfp-prefix-timer-heap.cc',
         'model/routing/nfp/nfp-seqnum.cc',
+        'model/routing/nfp/nfp-stats.cc',
         'model/routing/nfp/nfp-routing-helper.cc',
         'model/routing/nfp/nfp-routing-protocol.cc',
         'model/routing/nfp/nfp-withdraw.cc',
@@ -172,6 +170,7 @@ def build(bld):
         'model/routing/ccnx-routing-protocol.cc',
         # packets
         'model/packets/ccnx-packet.cc',
+        'model/packets/standard/ccnx-codec-registry.cc',
         'model/packets/standard/ccnx-codec-contentobject.cc',
         'model/packets/standard/ccnx-codec-fixedheader.cc',
         'model/packets/standard/ccnx-codec-interest.cc',
@@ -241,12 +240,6 @@ def build(bld):
         'model/crypto/ccnx-signer.h',
         'model/crypto/ccnx-verifier.h',
         'model/crypto/hashers/ccnx-hasher-fnv1a.h',
-        'model/crypto/hashers/ccnx-hasher-sha256-factory.h',
-        'model/crypto/hashers/ccnx-hasher-sha256-sim.h',
-        'model/crypto/signers/ccnx-signer-rsa-factory.h',
-        'model/crypto/signers/ccnx-signer-rsa-sim.h',        
-        'model/crypto/verifiers/ccnx-verifier-rsa-factory.h',
-        'model/crypto/verifiers/ccnx-verifier-rsa-sim.h',        
         # node
         'model/node/ccnx-connection.h',
         'model/node/ccnx-connection-list.h',
@@ -268,6 +261,7 @@ def build(bld):
         'model/forwarding/ccnx-forwarder.h',
         'model/forwarding/ccnx-forwarder-message.h',
         'model/forwarding/standard/ccnx-standard-content-store.h',
+        'model/forwarding/standard/ccnx-standard-content-store-lruList.h',
         'model/forwarding/standard/ccnx-standard-content-store-entry.h',
         'model/forwarding/standard/ccnx-standard-content-store-factory.h',
         'model/forwarding/standard/ccnx-standard-fib.h',
@@ -295,6 +289,7 @@ def build(bld):
         'model/routing/nfp/nfp-routing-protocol.h',
         'model/routing/nfp/nfp-schema.h',
         'model/routing/nfp/nfp-seqnum.h',
+        'model/routing/nfp/nfp-stats.h',
         'model/routing/nfp/nfp-withdraw.h',
         'model/routing/nfp/nfp-workqueue.h',
         'model/routing/nfp/nfp-workqueue-entry.h',
@@ -304,6 +299,8 @@ def build(bld):
         'model/routing/ccnx-routing-protocol.h',
         # packets
         'model/packets/ccnx-packet.h',
+        'model/packets/ccnx-type-registry.h',
+        'model/packets/standard/ccnx-codec-registry.h',
         'model/packets/standard/ccnx-codec-contentobject.h',
         'model/packets/standard/ccnx-codec-fixedheader.h',
         'model/packets/standard/ccnx-codec-interest.h',
@@ -313,14 +310,13 @@ def build(bld):
         'model/packets/standard/ccnx-codec-perhopheaderentry.h',
         'model/packets/standard/ccnx-codec-perhopheader.h',
         'model/packets/standard/ccnx-codec-interestlifetime.h',
-        # 'model/packets/standard/ccnx-registry.h',
         # Portal
         'model/portal/ccnx-portal.h',
         'model/portal/ccnx-portal-factory.h',
         'model/portal/message/ccnx-message-portal.h',
         'model/portal/message/ccnx-message-portalfactory.h',
         # Helpers
-         'helper/ccnx-ascii-trace-helper.h',
+        'helper/ccnx-ascii-trace-helper.h',
         'helper/ccnx-routing-helper.h',
         'helper/ccnx-layer3-helper.h',
         'helper/ccnx-forwarding-helper.h',

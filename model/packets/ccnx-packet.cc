@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -168,10 +168,10 @@ CCNxPacket::GetValidationAlgorithm () const
   return m_validationAlgorithm;
 }
 
-CCNxPerHopHeader
+Ptr<CCNxPerHopHeader>
 CCNxPacket::GetPerhopHeaders() const
 {
-	return m_codecPerHopHeader.GetHeader();
+  return m_codecPerHopHeader.GetHeader();
 }
 
 size_t
@@ -213,9 +213,6 @@ CCNxPacket::ComputePacketSize () const
 Ptr<Packet>
 CCNxPacket::GenerateNs3Packet ()
 {
-  // Set the total per hop header length
-  m_codecPerHopHeader.SetHeaderLength(m_codecPerHopHeader.GetSerializedSize());
-
   Ptr<CCNxFixedHeader> fh = GenerateFixedHeader (m_message->GetMessageType ());
   m_codecFixedHeader.SetHeader (fh);
 
@@ -240,8 +237,8 @@ CCNxPacket::GenerateNs3Packet ()
       NS_ASSERT_MSG (false, "Unsupported m_message run time type " << messageType);
     }
 
-  // Is this the correct place for per hop headers???
-  p->AddHeader (m_codecPerHopHeader);
+  if (GetPerHopHeaderLength() != 0)
+    p->AddHeader (m_codecPerHopHeader);
 
   // The fixed header goes outside the message header
   p->AddHeader (m_codecFixedHeader);
@@ -290,7 +287,7 @@ CCNxPacket::GetMessageTypeAsPacketType (CCNxMessage::MessageType messageType = C
 uint32_t
 CCNxPacket::GetPerHopHeaderLength (void) const
 {
-  return m_codecPerHopHeader.GetHeaderLength();
+  return m_codecPerHopHeader.GetSerializedSize();
 }
 
 uint8_t
@@ -346,7 +343,7 @@ CCNxPacket::Deserialize ()
    */
   if (hdrSize >= 8)
   {
-	  m_codecPerHopHeader.SetHeaderLength(hdrSize-8);
+      m_codecPerHopHeader.SetDeserializeLength(hdrSize-8);
       uint32_t msgSize = copy->RemoveHeader (m_codecPerHopHeader);
       NS_LOG_DEBUG ("Deserialize: per hop headers = " << msgSize);
   }
@@ -375,27 +372,29 @@ CCNxPacket::Deserialize ()
 }
 
 void
-CCNxPacket::SetContentObjectHash (CCNxHashValue hash)
+CCNxPacket::SetContentObjectHash (Ptr<CCNxHashValue> hash)
 {
-  m_hash = hash;
+  m_hash = hash->GetValue();
 }
 
-CCNxHashValue
+Ptr<CCNxHashValue>
 CCNxPacket::GetContentObjectHash (void) const
 {
-  return m_hash;
+  Ptr<CCNxHashValue> hash = Create<CCNxHashValue> (m_hash.GetValue());
+  return hash;
 }
 
 void
 CCNxPacket::AddPerHopHeaderEntry (Ptr<CCNxPerHopHeaderEntry> perHopHeaderEntry)
 {
-	m_codecPerHopHeader.GetHeader().AddHeader(perHopHeaderEntry);
+  m_codecPerHopHeader.GetHeader()->AddHeader(perHopHeaderEntry);
 }
 
 std::ostream &
 ns3::ccnx::operator<< (std::ostream &os, CCNxPacket const &packet)
 {
   os << "header " << *packet.GetFixedHeader ()
+     << "perhopheader " << *packet.GetPerhopHeaders()
      << ", message " << *packet.GetMessage ()
      << ", validation " << packet.GetValidationAlgorithm ();
   return os;

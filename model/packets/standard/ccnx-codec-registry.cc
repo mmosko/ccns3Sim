@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -53,30 +53,27 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_MODEL_CRYPTO_SIGNERS_CCNX_SIGNER_RSA_FACTORY_H_
-#define CCNS3SIM_MODEL_CRYPTO_SIGNERS_CCNX_SIGNER_RSA_FACTORY_H_
+#include "ccnx-codec-registry.h"
 
-#include "ns3/ccnx-signer.h"
-#include "ns3/ccnx-key.h"
+using namespace ns3;
+using namespace ns3::ccnx;
 
-namespace ns3 {
-namespace ccnx {
-/**
- * @ingroup ccnx-crypto
- *
- * The CCNxSignerRsaFactory creates RSA signers of a given implementation.  Set the
- * implementation via CCNxCrypto::SetMode(), then start creating signers.
- *
- * NOTE: NOT YET IMPLEMENTED
- *
- */
-class CCNxSignerRsaFactory
+CCNxCodecRegistry::PerHopRegistryType CCNxCodecRegistry::m_perHopRegistry("PerHop Registry");
+
+void
+CCNxCodecRegistry::PerHopRegisterCodec(TlvTypeType tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec)
 {
-public:
-  static Ptr<CCNxSigner> CreateSigner (Ptr<const CCNxKey> privateKey, Ptr<const CCNxKey> publicKey);
-};
+  m_perHopRegistry.Register(tlvType, codec);
+}
 
-}   /* namespace ccnx */
-} /* namespace ns3 */
+void
+CCNxCodecRegistry::PerHopUnegisterCodec(TlvTypeType tlvType)
+{
+  m_perHopRegistry.UnRegister(tlvType);
+}
 
-#endif /* CCNS3SIM_MODEL_CRYPTO_SIGNERS_CCNX_SIGNER_RSA_FACTORY_H_ */
+Ptr<CCNxCodecPerHopHeaderEntry>
+CCNxCodecRegistry::PerHopLookupCodec(TlvTypeType tlvType)
+{
+  return m_perHopRegistry.Lookup(tlvType);
+}

@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -147,6 +147,40 @@ NfpRoutingHelper::PrintComputationCost (Ptr<OutputStreamWrapper> stream, Ptr<Nod
   else
     {
       *stream->GetStream () << "No NfpRoutingProtocol bound to node " << node->GetId () << std::endl;
+    }
+}
+
+NfpComputationCost
+NfpRoutingHelper::GetComputationCost( Ptr<Node> node )
+{
+  Ptr<NfpRoutingProtocol> nfp = node->GetObject<NfpRoutingProtocol> ();
+  if (nfp)
+    {
+      return nfp->GetComputationCost();
+    }
+  else
+    {
+      NS_ASSERT_MSG(false, "Could not retrieve object NfpRoutingProtocol from node " << node->GetId ());
+
+      // return a "0" if asserts not working.
+      return NfpComputationCost();
+    }
+}
+
+NfpStats
+NfpRoutingHelper::GetStats( Ptr<Node> node )
+{
+  Ptr<NfpRoutingProtocol> nfp = node->GetObject<NfpRoutingProtocol> ();
+  if (nfp)
+    {
+      return nfp->GetStats();
+    }
+  else
+    {
+      NS_ASSERT_MSG(false, "Could not retrieve object NfpRoutingProtocol from node " << node->GetId ());
+
+      // return a "0" if asserts not working.
+      return NfpStats();
     }
 }
 

@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -53,33 +53,85 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#include "ns3/test.h"
-#include "ns3/ccnx-verifier-rsa-factory.h"
+#ifndef CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_STANDARD_CONTENT_STORE_LRU_LIST_H_
+#define CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_STANDARD_CONTENT_STORE_LRU_LIST_H_
 
-#include "../../TestMacros.h"
+#include <unordered_map>
+#include "ns3/simple-ref-count.h"
+#include "ns3/ccnx-standard-content-store-entry.h"
 
-using namespace ns3;
-using namespace ns3::ccnx;
+namespace ns3 {
+namespace ccnx {
 
-namespace TestSuiteCCNxVerifierRsaFactory {
-
-BeginTest (Constructor)
-{
-}
-EndTest ()
-
-/**
- * @ingroup ccnx-test
- *
- * Test Suite for CCNxVerifierRsaFactory
- */
-static class TestSuiteCCNxVerifierRsaFactory : public TestSuite
+class CCNxStandardContentStoreLruList : public ns3::SimpleRefCount<CCNxStandardContentStoreLruList>
 {
 public:
-  TestSuiteCCNxVerifierRsaFactory () : TestSuite ("ccnx-verifier-rsa-factory", UNIT)
-  {
-    AddTestCase (new Constructor (), TestCase::QUICK);
-  }
-} g_TestSuiteCCNxVerifierRsaFactory;
 
-} // namespace TestSuiteCCNxVerifierRsaFactory
+
+  CCNxStandardContentStoreLruList ();
+
+  virtual ~CCNxStandardContentStoreLruList ();
+
+  /**
+   * The Least Recently Used (lru) list has the least recently used packet at the end of the list,
+   * and the most recently used at the beginning. The list allows the LRU algorithm to be used when
+   * to evict packets when the content store has reached maximum size.
+   *
+   * The data structure need to enable the scalable quick operations listed below in priority order:
+   *
+   * 1. find an entry if present.
+   * 2. Add an entry if not present.
+   * 3. Delete the least recently used entry.  occurs every time an object is added (once the CS has filled).
+   * 4. Refresh an entry if present.
+   *
+   * This approach uses an unordered map < Ptr<entry>, listIterator> and a list < entry >. The map delivers quick
+   * scalable find(1) while the list provides add(2),refresh(4),delete(3).
+   *
+   * @param entry
+   * @return
+   **/
+
+  /*
+   * Add/Refresh an Entry to/in the LRU.
+   */
+   bool AddEntry(Ptr<CCNxStandardContentStoreEntry> entry);
+
+  /*
+   * Delete an Entry from the LRU. Not a common operation.
+   */
+   bool DeleteEntry(Ptr<CCNxStandardContentStoreEntry> entry);
+
+   /*
+    * Return entry ptr so it can be deleted from Lru and  other structures.
+    */
+
+   Ptr<CCNxStandardContentStoreEntry> GetBackEntry() ;
+
+   Ptr<CCNxStandardContentStoreEntry> GetFrontEntry() ;
+
+
+
+   uint64_t GetSize() const;
+
+
+protected:
+
+
+private:
+
+  typedef std::list<Ptr<CCNxStandardContentStoreEntry> > LruListType;
+  LruListType m_lruList;
+
+  typedef std::map <Ptr<CCNxStandardContentStoreEntry>,  LruListType::iterator > LruMapType;
+  LruMapType m_lruMap;
+};
+
+}   /* namespace ccnx */
+} /* namespace ns3 */
+
+
+
+
+
+
+#endif /* CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_STANDARD_CONTENT_STORE_LRU_LIST_H_ */

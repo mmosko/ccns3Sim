@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -53,49 +53,77 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
+#ifndef CCNS3SIM_MODEL_PACKETS_CCNX_TYPE_REGISTRY_H_
+#define CCNS3SIM_MODEL_PACKETS_CCNX_TYPE_REGISTRY_H_
 
-#ifndef CCNS3SIM_MODEL_CRYPTO_HASHERS_CCNX_HASHER_SHA256_SIM_H_
-#define CCNS3SIM_MODEL_CRYPTO_HASHERS_CCNX_HASHER_SHA256_SIM_H_
-
-#include "ns3/ccnx-hasher-fnv1a.h"
+#include <map>
+#include "ns3/simple-ref-count.h"
+#include "ns3/ptr.h"
 
 namespace ns3 {
 namespace ccnx {
 
-/**
- * @ingroup ccnx-crypto
- *
- * A simulated SHA256 hasher.  It will use FNV1a 64-bit and pad it out to 32-bytes.
- *
- */
-class CCNxHasherSha256Sim : public CCNxHasherFnv1a
+template<class TlvType, class RegistryClass>
+class CCNxTypeRegistry : public SimpleRefCount< CCNxTypeRegistry<TlvType, RegistryClass> >
 {
+protected:
+
+  /**
+   * Typedef for mapping TLV type to codec
+   */
+
+  typedef typename std::map< TlvType, Ptr<RegistryClass> > RegistryMapType;
+  typedef typename RegistryMapType::const_iterator ConstIteratorType;
+  RegistryMapType m_registry;
+
 public:
-  static TypeId GetTypeId ();
+  /**
+   * A generic registry of TLV type to codec.
+   *
+   * @param description [in] A description of the registry (purely informative)
+   */
+
+  CCNxTypeRegistry (std::string description) : m_description(description)
+  {
+  }
+
+  virtual ~CCNxTypeRegistry () {}
 
   /**
-   * Do not call this directly.  Use the CCNxVerifierRsaFactory.
-   *
-   * We would normally make this protected, but the way NS3 uses ns3::CreateObject<>() does not
-   * allow us to make the constructor private in a way that only the factory can call.
-   *
-   * @param privateKey
-   * @param publicKey
+   * Create a mapping between TLV type and another class
    */
-  CCNxHasherSha256Sim ();
-
-  virtual ~CCNxHasherSha256Sim ();
+  void Register(TlvType tlvType, Ptr<RegistryClass> registeredClass)
+  {
+    NS_ASSERT_MSG(m_registry[tlvType] == 0, "Can't overwrite the registered class for type " << tlvType);
+    m_registry[tlvType] = registeredClass;
+  }
 
   /**
-   * We only need to override the Finalize method so we return
-   * the hash value in 32 bytes.
+   * Remove the registration for a type.  To replace a registration, you must first remove it
+   * then re-register with a call to `Register()`.
    *
-   * @return The hash value
+   * @param tlvType
    */
-  virtual Ptr<CCNxHashValue> Finalize ();
+
+  void UnRegister(TlvType tlvType)
+  {
+    m_registry.erase(tlvType);
+  }
+
+  Ptr<RegistryClass> Lookup(TlvType tlvType)
+  {
+    Ptr<RegistryClass> registeredClass = Ptr<RegistryClass>(0);
+    ConstIteratorType i = m_registry.find(tlvType);
+    if (i != m_registry.end()) {
+	registeredClass = i->second;
+    }
+    return registeredClass;
+  }
+
+private:
+  std::string m_description;
 };
-
-}   /* namespace ccnx */
+} /* namespace ccnx */
 } /* namespace ns3 */
 
-#endif /* CCNS3SIM_MODEL_CRYPTO_HASHERS_CCNX_HASHER_SHA256_SIM_H_ */
+#endif /* CCNS3SIM_MODEL_PACKETS_CCNX_TYPE_REGISTRY_H_ */

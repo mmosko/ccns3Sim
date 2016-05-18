@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -61,6 +61,7 @@
 #include "ns3/assert.h"
 #include "ns3/integer.h"
 #include "ns3/object-factory.h"
+#include "ns3/ccnx-standard-content-store-factory.h"
 
 #include "../../TestMacros.h"
 
@@ -94,7 +95,7 @@ MockupRouteCallback (Ptr<CCNxPacket> packet, Ptr<CCNxConnection> ingress, enum C
   _routeCallbackFired = true;
 }
 
-Ptr<CCNxStandardForwarder> CreateForwarder ()
+Ptr<CCNxStandardForwarder> CreateForwarder (bool WithContentStore=true)
 {
 #if 0
   LogComponentEnable ("CCNxStandardForwarder", (LogLevel) (LOG_LEVEL_FUNCTION | LOG_PREFIX_ALL));
@@ -105,6 +106,12 @@ Ptr<CCNxStandardForwarder> CreateForwarder ()
 #endif
 
   Ptr<CCNxStandardForwarder> forwarder = CreateObject<CCNxStandardForwarder> ();
+  if (WithContentStore)
+    {
+      static CCNxStandardContentStoreFactory factory;
+      forwarder->SetAttribute ("ContentStoreFactory", ObjectFactoryValue (factory));
+    }
+
   forwarder->SetAttribute ("LayerDelayConstant", TimeValue (_layerDelay));
   forwarder->SetAttribute ("LayerDelaySlope", TimeValue (Seconds (0)));
   forwarder->SetAttribute ("LayerDelayServers", IntegerValue (1));
@@ -376,7 +383,7 @@ BeginTest (InterestToTwo)
   NS_TEST_EXPECT_MSG_EQ (forwarder->CountEntries (CCNxStandardForwarder::PitTable),1,"wrong number of pit entries");
 
   //route content from ingress1 - should be sent to only ingress2 because it arrived on ingress1
-  // TODO: make a test case where content object goes to both ingress1 and ingress2
+  // TODO CCN: make a test case where content object goes to both ingress1 and ingress2
   forwarder->RouteInput (data.cPacket1, data.ingress1);
   StepSimulator ();
   NS_TEST_EXPECT_MSG_EQ (_routeCallbackErrno,CCNxRoutingError::CCNxRoutingError_NoError,"wrong errorno");
@@ -567,7 +574,7 @@ BeginTest (NoContentStore)
 {
   //route one interest one content then same interest which returns content from CS
 
-  Ptr<CCNxStandardForwarder> forwarder = CreateForwarder ();
+  Ptr<CCNxStandardForwarder> forwarder = CreateForwarder (false);  //false => no content store
   TestData data = CreateTestData ();
   SetupRoutes (forwarder, data);
 
@@ -612,11 +619,13 @@ BeginTest (NoContentStore)
 }
 EndTest ()
 
-//#TODO test forwarder stats
-//#TODO test no content store option set by attribute
-//#TODO fix delay model for content store
-//#TODO get rid of KEYIDHACK
-//#TODO get line coverage to 100%
+
+
+//#TODO CCN test forwarder stats
+//#TODO CCN test no content store option set by attribute
+//#TODO CCN fix delay model for content store
+//#TODO CCN get rid of KEYIDHACK
+//#TODO CCN get line coverage to 100%
 
 
 /**
@@ -633,13 +642,13 @@ public:
     AddTestCase (new OneInterestToOneContent (), TestCase::QUICK);
     AddTestCase (new OneInterestNonMatchingContent (), TestCase::QUICK);
     AddTestCase (new TwoInterestOneContent (), TestCase::QUICK);
-//   AddTestCase (new InterestReturnPacket, TestCase::QUICK); TODO write this case
+//   AddTestCase (new InterestReturnPacket, TestCase::QUICK); TODO CCN write this case
     AddTestCase (new InterestToTwo (), TestCase::QUICK);
     AddTestCase (new DuplicateRoutes (), TestCase::QUICK);
     AddTestCase (new RouteOutputOneInterestOneContent (), TestCase::QUICK);
     AddTestCase (new RouteExactName (), TestCase::QUICK);
     AddTestCase (new ContentStore (), TestCase::QUICK);
-//    AddTestCase (new NoContentStore (), TestCase::QUICK);   TODO: Marc: how to disable content store?
+    AddTestCase (new NoContentStore (), TestCase::QUICK);
 
   }
 } g_TestSuiteCCNxStandardForwarder;

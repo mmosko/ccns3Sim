@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -66,7 +66,7 @@ namespace ccnx {
 /**
  * @ingroup ccnx-messages
  *
- * Class representation of an InterestLifetime Per Hop Header Entry.
+ * Class representation of InterestLifetime Per Hop Header Entry.
  */
 class CCNxInterestLifetime : public CCNxPerHopHeaderEntry {
 public:
@@ -96,6 +96,19 @@ public:
    * Returns the Interest Lifetime associated with this TLV
    */
   Ptr<CCNxTime>   GetInterestLifetime () const;
+
+  /**
+   * Prints a string like this:
+   *
+   * { Interest Lifetime timeValue T }
+   *
+   * Where T is the uint64_t value of the CCNxTime.
+   *
+   * @param [in] os ostream object
+   * @return ostream object
+   */
+
+   virtual std::ostream & Print(std::ostream &os) const;
 
 protected:
 

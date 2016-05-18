@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -59,11 +59,12 @@
 #include <map>
 #include "ns3/ccnx-content-store.h"
 #include "ns3/ccnx-standard-content-store-entry.h"
+#include "ns3/ccnx-standard-content-store-lruList.h"
 #include "ns3/ccnx-standard-forwarder-work-item.h"
 #include "ns3/ccnx-delay-queue.h"
 #include "ns3/ccnx-name.h"
 #include "ns3/ccnx-hash-value.h"
-#include "ns3/log.h"
+
 
 namespace ns3 {
 namespace ccnx {
@@ -110,7 +111,7 @@ public:
   virtual void SetAddContentObjectCallback (AddContentObjectCallback addContentObjectCallback);
 
 
-//TODO make ServiceMatchInterest and other internal methods private:
+//TODO CCN make ServiceMatchInterest and other internal methods private:
 
   /**
    * After input delay, service a MatchInterest request and send the
@@ -118,7 +119,7 @@ public:
    *
    * @param workItem [in] The work Item containing the interest being serviced
    */
-  void ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkItem> workItem);
+  bool ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkItem> workItem);
 
   /**
    * After input delay, service a AddContentObject request and send the
@@ -133,10 +134,10 @@ public:
    * @return true If the object was added
    * @return false If the object was not added
    */
-  virtual void ServiceAddContentObject (Ptr<CCNxStandardForwarderWorkItem> workItem);
+   bool ServiceAddContentObject (Ptr<CCNxStandardForwarderWorkItem> workItem);
 
   /**
-   * Removes the given object from the content store
+   * Deletes the given object from the content store
    *
    * This should be the same object (name, keyid, hash) as was added previously, or
    * found via `MatchInterest()`.
@@ -145,7 +146,7 @@ public:
    * @return true if removed
    * @return false If not removed (i.e. not found)
    */
-  virtual bool RemoveContentObject (Ptr<CCNxPacket> cPacket);
+  virtual bool DeleteContentObject (Ptr<CCNxPacket> cPacket);
 
   /**
    * Returns the number of content object packets in the content store.
@@ -173,40 +174,44 @@ public:
   Ptr<CCNxStandardContentStoreEntry> FindEntryInHashMap(Ptr<CCNxPacket> cPacket);
 
 
-  /**
-   * Returns the number of content object in the hash map.
-   *
-   * @return The number of objects in the hash map.
-   */
-  virtual size_t GetMapByHashCount() const;
-
-  /**
-   * Returns the number of content object in the name map.
-   *
-   * @return The number of objects in the name map.
-   */
-  virtual size_t GetMapByNameCount() const;
-
-  /**
-   * Returns the number of content object in the nameKeyid map.
-   *
-   * @return The number of objects in the nameKeyid map.
-   */
-  virtual size_t GetMapByNameKeyidCount() const;
 
   virtual bool IsEntryValid(Ptr<CCNxStandardContentStoreEntry> entry) const;
 
-  virtual Ptr<CCNxPacket> GetLruListTailPacket () const;
 
-  virtual bool AddLruListEntry(Ptr<CCNxStandardContentStoreEntry> entry);
-
-  virtual bool DeleteLruListEntry(Ptr<CCNxStandardContentStoreEntry> entry);
-
-  virtual bool RefreshLruListEntry(Ptr<CCNxStandardContentStoreEntry> entry);
-
-  virtual bool DeleteLruListPacket(Ptr<CCNxPacket> cPacket);
 
   virtual bool AddMapEntry(Ptr<CCNxPacket> cPacket, Ptr<CCNxStandardContentStoreEntry> newEntry);
+
+
+  /**
+     * Function to compare two smart pointers to CCNx packets based on Hash and Keyid.
+     * Uses the KeyId on a validation of a content object, or KeyidRestriction on an interest.
+     * used in std::map as the comparison function to properly order content store map entries.
+     *
+     * Example:
+     * @code
+     * {
+     *   std::map<Ptr<CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxPacketByHashKeyid> m_csByHashKeyid;
+     * }
+     * @endcode
+     */
+    struct isLessPtrCCNxPacketByHashKeyid
+     {
+       bool operator() (Ptr<const CCNxPacket> a, Ptr<const CCNxPacket> b) const
+       {
+ 	Ptr<const CCNxByteArray> aKeyid = GetKeyidOrRestriction(a);
+ 	Ptr<const CCNxByteArray> bKeyid = GetKeyidOrRestriction(b);
+         if (*aKeyid== *bKeyid)
+           {
+             return (*GetHashOrRestriction(a) < *GetHashOrRestriction(b));
+           }
+         else
+           {
+             return (*aKeyid < *bKeyid);
+           }
+
+       }
+     };
+
 
   /**
     * Function to compare two smart pointers to CCNx packets based on Name and Keyid.
@@ -216,52 +221,23 @@ public:
     * Example:
     * @code
     * {
-    *   std::map<Ptr<CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxNameKeyid> m_csByNameKeyid;
+    *   std::map<Ptr<CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxPacketByNameKeyid> m_csByNameKeyid;
     * }
     * @endcode
     */
-   struct isLessPtrCCNxNameKeyid
+   struct isLessPtrCCNxPacketByNameKeyid
     {
-      //mutable allows assignment inside function which must be marked const
-      mutable Ptr<CCNxInterest> zInterest;
-      mutable Ptr<CCNxHashValue> aKeyid,bKeyid,zKeyid;
-
-      Ptr<CCNxHashValue> GetKeyIdFromMessage(Ptr<const CCNxPacket> z) const
-        {
-        switch (z->GetMessage()->GetMessageType())
-        {
-        case CCNxMessage::Interest :
-	  zInterest = DynamicCast<CCNxInterest, CCNxMessage>(z->GetMessage());
-	  zKeyid = zInterest->GetKeyidRestriction();
-	  break;
-        case CCNxMessage::ContentObject :
-    #ifdef KEYIDHACK
-	  //hack  magic number keyIdRest into content
-	  zKeyid = Create <CCNxHashValue> (55);    //TODO - remove when marc's keyid available
-    #else
-	  zKeyid = ???
-    #endif
-	      break;
-        default:
-            NS_ASSERT("cant find keyid - packet has bad message type");
-            zKeyid = Ptr<CCNxHashValue> (0);
-            break;
-        }
-        return zKeyid;
-
-        }
-
       bool operator() (Ptr<const CCNxPacket> a, Ptr<const CCNxPacket> b) const
       {
-        aKeyid = GetKeyIdFromMessage(a);
-        bKeyid = GetKeyIdFromMessage(b);
-        if (*aKeyid->GetValue() == *bKeyid->GetValue())
+	Ptr<const CCNxByteArray> aKeyid = GetKeyidOrRestriction(a);
+	Ptr<const CCNxByteArray> bKeyid = GetKeyidOrRestriction(b);
+        if (*aKeyid== *bKeyid)
           {
             return (*a->GetMessage()->GetName() < *b->GetMessage()->GetName());
           }
         else
           {
-            return (*aKeyid->GetValue() < *bKeyid->GetValue());
+            return (*aKeyid < *bKeyid);
           }
 
       }
@@ -275,37 +251,16 @@ public:
        * Example:
        * @code
        * {
-       *   std::map<Ptr<CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxHashValue> m_csByHashValue;
+       *   std::map<Ptr<CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxPacketByHashValue> m_csByHashValue;
        * }
        * @endcode
        */
-      struct isLessPtrCCNxHashValue
-    {
-      mutable Ptr<CCNxInterest> zInterest;
-
-      Ptr<const CCNxByteArray> GetHashFromMessage(Ptr<const CCNxPacket> z) const
-        {
-        switch (z->GetMessage()->GetMessageType())
-        {
-        case CCNxMessage::Interest :
-	  zInterest = DynamicCast<CCNxInterest, CCNxMessage>(z->GetMessage());
-//          NS_LOG_DEBUG("interest packet:name="<< *z->GetMessage()->GetName() << ", hash value=" << zInterest->GetHashRestriction().GetValue);
-	  return(zInterest->GetHashRestriction()->GetValue());
-	  break;
-        case CCNxMessage::ContentObject :
-//          NS_LOG_DEBUG("content packet:name="<< *z->GetMessage()->GetName() << ", hash value=" << z->GetContentObjectHash().GetValue);
-	  return(z->GetContentObjectHash().GetValue());
-	  break;
-        default:
-            NS_ASSERT("cant find hash - packet has bad message type");
-            return(Ptr<CCNxByteArray> (0));
-            break;
-        } //switch
-        }
+      struct isLessPtrCCNxPacketByHashValue
+      {
 
       bool operator() (Ptr<const CCNxPacket> a, Ptr<const CCNxPacket> b) const
       {
-        return (*GetHashFromMessage(a) < *GetHashFromMessage(b));
+        return (*GetHashOrRestriction(a) < *GetHashOrRestriction(b));
 
       }
     };
@@ -317,11 +272,11 @@ public:
          * Example:
          * @code
          * {
-         *   std::map<Ptr<CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxName> m_csByName;
+         *   std::map<Ptr<CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxPacketByName> m_csByName;
          * }
          * @endcode
          */
-        struct isLessPtrCCNxName
+        struct isLessPtrCCNxPacketByName
       {
         bool operator() (Ptr<const CCNxPacket> a, Ptr<const CCNxPacket> b) const
         {
@@ -330,45 +285,71 @@ public:
         }
       };
 
+        //Names to CS entry lookup
+        typedef std::map<Ptr<const CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxPacketByName>  CSByNameType;
+
+        //Hash values to CS entry lookup
+        typedef std::map<Ptr<const CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxPacketByHashValue> CSByHashType;
+
+        //Name and Keyid to CS entry lookup
+        typedef std::map<Ptr<const CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxPacketByNameKeyid> CSByNameKeyidType;
+
+        //Name and Keyid to CS entry lookup
+        typedef std::map<Ptr<const CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxPacketByHashKeyid> CSByHashKeyidType;
+
+        //TODO CCN ask marc can content object  have keyid but no name?
+
+protected:
+
+      /**
+	* The maps below hold pointers to content packets in the content store.
+	* When a packet is added to the store, it is added to one or more maps.
+	* It is always added to the hash list (since all content objects have a hash value),
+	* but only added to the name list if it has a name,
+	* and only added to the name/keyid list if it has a name and a keyid.
+	* They are Protected rather than private so they can be accessed by test methods in a derived class used for unit testing.
+	*
+	*/
+
+        CSByNameType m_csByName;
+
+        CSByHashType m_csByHash;
+
+        CSByNameKeyidType m_csByNameKeyid;
+
+        CSByHashKeyidType m_csByHashKeyid;
+
+        /**
+          * The Least Recently Used (lru) list is a class which has the least recently used packet at the end of the list,
+          * and the most recently used at the beginning. The list allows the LRU algorithm to be used when
+          * to evict packets when the content store has reached maximum size.
+	  * Protected rather than private so it can be accessed by test methods in a derived class used for unit testing.
+          */
+
+        Ptr<CCNxStandardContentStoreLruList> m_lruList;
 
 private:
 
   // ns3::Object::DoInitialize()
   virtual void DoInitialize ();
 
-  /** Maxium number of content objects to store in content store */
-  uint64_t m_objectCapacity;
+  /**
+   * Function to return KeyidRestriction from Interest packet or Keyid from ContentObject packet
+   * /used to search Content Store packet lookup maps. static allows use in comparison struct.
+   */
+
+  static Ptr<const CCNxByteArray> GetKeyidOrRestriction(Ptr<const CCNxPacket> z) ;
 
   /**
-    * The maps below hold pointers to content packets in the content store.
-    * When a packet is added to the store, it is added to one or more maps.
-    * It is always added to the hash list (since all content objects have a hash value),
-    * but only added to the name list if it has a name,
-    * and only added to the name/keyid list if it has a name and a keyid.
-    *
-    */
+   * Function to return HashRestriction from Interest packet or Hash from ContentObject packet
+   * /used to search Content Store packet lookup maps. static allows use in comparison struct.
+   */
+  static Ptr<const CCNxByteArray> GetHashOrRestriction(Ptr<const CCNxPacket> z) ;
 
-  //Names to CS entry lookup
-  typedef std::map<Ptr<const CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxName>  CSByNameType;
-
-  //Hash values to CS entry lookup
-  typedef std::map<Ptr<const CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxHashValue> CSByHashType;
-
-  //Name and Keyid to CS entry lookup
-  typedef std::map<Ptr<const CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxNameKeyid> CSByNameKeyidType;
-  //TODO ask marc can content object  have keyid but no name?
-
-  CSByNameType m_csByName;
-  CSByHashType m_csByHash;
-  CSByNameKeyidType m_csByNameKeyid;
+  /** Maxium number of content objects to store in content store */
+  long long m_objectCapacity;
 
 
-   /**
-    * The Least Recently Used (lru) list has the least recently used packet at the end of the list,
-    * and the most recently used at the beginning. The list allows the LRU algorithm to be used when
-    * to evict packets when the content store has reached maximum size.
-    */
-   std::list<Ptr<CCNxStandardContentStoreEntry> > m_lruList;
 
    /**
     * Set by the forwarder as the callback for matchInterest
@@ -381,11 +362,6 @@ private:
      */
 
   AddContentObjectCallback m_addContentObjectCallback;
-
-
-
-
-
 
 
 //   /**
@@ -420,7 +396,7 @@ private:
     * @param item [in] The work item to service
     */
 
-   void ServiceInputQueue (Ptr<CCNxStandardForwarderWorkItem> workItem);
+   void DequeueCallback (Ptr<CCNxStandardForwarderWorkItem> workItem);
 
   /**
    * The layer delay is:

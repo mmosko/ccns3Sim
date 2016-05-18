@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -53,80 +53,104 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_MODEL_CRYPTO_SIGNERS_CCNX_SIGNER_RSA_SIM_H_
-#define CCNS3SIM_MODEL_CRYPTO_SIGNERS_CCNX_SIGNER_RSA_SIM_H_
+#include "ns3/assert.h"
+#include "ns3/log.h"
+#include "ccnx-standard-content-store-lruList.h"
+#include "ns3/ccnx-standard-content-store-entry.h"
+#include <list>
+#include <unordered_map>
+#include <assert.h>
 
-#include "ns3/ccnx-signer.h"
-#include "ns3/ccnx-key.h"
+using namespace ns3;
+using namespace ns3::ccnx;
 
-namespace ns3 {
-namespace ccnx {
-/**
- * @ingroup ccnx-crypto
- *
- * Simulate signatures.  For a given (KeyId, Digest) pair, we generate a unique CCNxSignature.  These
- * have nothing to do with an actual RSA signature.
- */
-class CCNxSignerRsaSim : public CCNxSigner
+
+NS_LOG_COMPONENT_DEFINE ("CCNxStandardContentStoreLruList");
+
+
+CCNxStandardContentStoreLruList::CCNxStandardContentStoreLruList ()
 {
-  friend class CCNxSignerRsaFactory;
 
-public:
-  virtual ~CCNxSignerRsaSim ();
+}
 
-  static TypeId GetTypeId ();
-  virtual TypeId GetInstanceTypeId () const;
+CCNxStandardContentStoreLruList::~CCNxStandardContentStoreLruList ()
+{
 
-  /**
-   * Do not call this directly.  Use the CCNxSignerRsaFactory.
-   *
-   * We would normally make this protected, but the way NS3 uses ns3::CreateObject<>() does not
-   * allow us to make the constructor private in a way that only the factory can call.
-   *
-   * NOTE: NOT YET IMPLEMENTED
-   *
-   * @param privateKey
-   * @param publicKey
-   */
-  CCNxSignerRsaSim (Ptr<const CCNxKey> privateKey, Ptr<const CCNxKey> publicKey);
+}
 
-  /**
-   * Return the KeyId that identifies this signer.
-   * @return
-   */
-  virtual Ptr<const CCNxKeyId> GetKeyId ();
 
-  virtual Ptr<const CCNxKey> GetDerEncodedPublicKey ();
 
-  /**
-   * Get the hash function to use to compute the signature.
-   * Run all the bytes to be signed through this hasher, then call SignDigest()
-   * on the output of the hasher.
-   *
-   * @return
-   */
-  virtual Ptr<CCNxHasher> GetSignatureHasher ();
+bool
+CCNxStandardContentStoreLruList::AddEntry(Ptr<CCNxStandardContentStoreEntry> entry)
+{
 
-  /**
-   * Sign the given hash value.  The hash value should be derived from the hasher
-   * from GetSignatureHasher().
-   *
-   * @param hash
-   * @return
-   */
-  virtual Ptr<CCNxSignature> Sign (Ptr<const CCNxHashValue> hash);
+      LruMapType::iterator it = m_lruMap.find(entry); //search map
 
-  virtual CCNxSigningAlgorithm GetSigningAlgorithm () const;
+      if(it != m_lruMap.end())
+	{ // already exists
+	      m_lruList.erase(it->second); //remove  from list. should be fast
+	      m_lruList.push_front(entry); //add entry to the front of the list
+	      it->second = m_lruList.begin(); //update map
+	}
+      else
+	{  //not in map
+	      m_lruList.push_front(entry); //add entry to the front of the list
+	      m_lruMap.insert(make_pair(entry, m_lruList.begin())); //add it to the map
+	}
 
-  virtual CCNxHashingAlgorithm GetHashingAlgorithm () const;
 
-protected:
-  Ptr<const CCNxKey> m_privateKey;
-  Ptr<const CCNxKey> m_publicKey;
-  Ptr<CCNxHashValue> m_keyid;
-};
+      return true;
 
-}   /* namespace ccnx */
-} /* namespace ns3 */
+}
 
-#endif /* CCNS3SIM_MODEL_CRYPTO_SIGNERS_CCNX_SIGNER_RSA_SIM_H_ */
+bool
+CCNxStandardContentStoreLruList::DeleteEntry(Ptr<CCNxStandardContentStoreEntry> entry)
+{
+  bool result=false;
+
+  LruMapType::iterator it = m_lruMap.find(entry);
+
+  if(it != m_lruMap.end())
+    { // already exists, remove it from list and map (quicker to update map entry?)
+      result=true;
+      m_lruList.erase(it->second);
+      m_lruMap.erase(it);
+    }
+  else
+    {
+      NS_LOG_ERROR("Can't delete Entry - entry not found in m_lruMap.");
+    }
+  return result;
+
+
+}
+
+uint64_t
+CCNxStandardContentStoreLruList::GetSize() const
+{
+
+  NS_ASSERT_MSG(m_lruList.size()==m_lruMap.size(), "LRU list and map sizes differ" );
+  return m_lruList.size();
+
+
+}
+
+Ptr<CCNxStandardContentStoreEntry>
+CCNxStandardContentStoreLruList::GetBackEntry()
+{
+  return m_lruList.back();
+}
+
+
+Ptr<CCNxStandardContentStoreEntry>
+CCNxStandardContentStoreLruList::GetFrontEntry()
+{
+  return m_lruList.front();
+}
+
+
+
+
+
+
+

@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -68,6 +68,7 @@ namespace ccnx {
  * Represents a Per Hop header entry. This class is a base class for per hop
  * header representation.
  * Implementation classes: CCNxInterestLifetime
+ * @see CCNxInterestLifetime
  */
 class CCNxPerHopHeaderEntry : public Object {
 public:
@@ -91,6 +92,8 @@ public:
    * header the base class pointer represents
    */
   virtual uint16_t GetInstanceTLVType (void) const = 0;
+
+  virtual std::ostream & Print(std::ostream &os) const = 0;
 };
 
 }

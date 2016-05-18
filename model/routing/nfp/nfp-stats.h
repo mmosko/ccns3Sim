@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -53,33 +53,82 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#include "ns3/test.h"
-#include "ns3/ccnx-verifier-rsa-sim.h"
+#ifndef CCNS3SIM_MODEL_ROUTING_NFP_NFP_STATS_H_
+#define CCNS3SIM_MODEL_ROUTING_NFP_NFP_STATS_H_
 
-#include "../../TestMacros.h"
+#include <ostream>
+#include <stdint.h>
 
-using namespace ns3;
-using namespace ns3::ccnx;
-
-namespace TestSuiteCCNxVerifierRsaSim {
-
-BeginTest (Constructor)
+namespace ns3
 {
-}
-EndTest ()
-
-/**
- * @ingroup ccnx-test
- *
- * Test Suite for CCNxVerifierRsaSim
- */
-static class TestSuiteCCNxVerifierRsaSim : public TestSuite
-{
-public:
-  TestSuiteCCNxVerifierRsaSim () : TestSuite ("ccnx-verifier-rsa-sim", UNIT)
+  namespace ccnx
   {
-    AddTestCase (new Constructor (), TestCase::QUICK);
-  }
-} g_TestSuiteCCNxVerifierRsaSim;
 
-} // namespace TestSuiteCCNxVerifierRsaSim
+    class NfpStats
+    {
+    public:
+      NfpStats ();
+
+      NfpStats(const NfpStats &copy);
+
+      NfpStats & operator += (const NfpStats &other);
+
+      void SetNodeId(uint32_t nodeId);
+
+      void IncrementPayloadsSent();
+      void IncrementBytesSent(uint64_t value);
+      void IncrementPayloadsReceived();
+      void IncrementBytesReceived(uint64_t value);
+
+      void IncrementHellosSent();
+      uint64_t GetHellosSent() const;
+
+      void IncrementAdvertiseOriginated();
+      void IncrementAdvertiseSent();
+      void IncrementAdvertiseReceived();
+      void IncrementAdvertiseReceivedFeasible();
+
+      void IncrementWithdrawOriginated();
+      void IncrementWithdrawSent();
+      void IncrementWithdrawReceived();
+
+      uint64_t GetPayloadsSent() const;
+      uint64_t GetBytesSent() const;
+      uint64_t GetPayloadsReceived() const;
+      uint64_t GetBytesReceived() const;
+
+      uint64_t GetAdvertiseOriginated() const;
+      uint64_t GetAdvertiseSent() const;
+      uint64_t GetAdvertiseReceived() const;
+      uint64_t GetAdvertiseReceivedFeasible() const;
+
+      uint64_t GetWithdrawOriginated() const;
+      uint64_t GetWithdrawSent() const;
+      uint64_t GetWithdrawReceived() const;
+
+      friend std::ostream & operator << (std::ostream &os, const NfpStats &stats);
+
+    protected:
+      uint32_t 	  m_nodeId;
+      uint64_t    m_payloadsSent;           //<! number of NfpPayloads sent (all interfaces)
+      uint64_t    m_bytesSent;              //<! total bytes of NfpPayload sent (over all interfaces)
+
+      uint64_t    m_payloadsReceived;               //<! Number of NfpPayloads received
+      uint64_t    m_bytesReceived;                  //<! Total bytes of NfpPayloads received
+
+      uint64_t	  m_hellosSent;			    //<! Number of empty messages sent as hellos
+      uint64_t    m_advertiseOriginated;            //<! Advertisements we originated
+      uint64_t    m_advertiseSent;                  //<! Advertisements we sent (includes Originated)
+      uint64_t    m_advertiseReceived;              //<! Advertisements we received
+      uint64_t    m_advertiseReceivedFeasible;              //<! Advertisements we received and were feasible
+
+      uint64_t    m_withdrawOriginated;            //<! Withdraws we originated
+      uint64_t    m_withdrawSent;
+      uint64_t    m_withdrawReceived;
+      };
+
+
+  } /* namespace ccnx */
+} /* namespace ns3 */
+
+#endif /* CCNS3SIM_MODEL_ROUTING_NFP_NFP_STATS_H_ */

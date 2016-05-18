@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -67,7 +67,7 @@ namespace ccnx {
  *
  * Factory to create a Standard PIT.
  *
- * TODO: Need to add setters for future PIT parameters, such as "max entries"
+ * TODO CCN: Need to add setters for future PIT parameters, such as "max entries"
  */
 class CCNxStandardPitFactory : public ns3::ObjectFactory
 {
@@ -78,7 +78,7 @@ public:
   /**
    * Sets the default lifetime of an Interest that does not have a "LifeTime" header
    *
-   * TODO: This is not working yet, need to move the concept of lifetime out of PitEntry in to Pit.
+   * TODO CCN: This is not working yet, need to move the concept of lifetime out of PitEntry in to Pit.
    *
    * @param lifetime
    */

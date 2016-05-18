@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -53,42 +53,3 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_MODEL_CRYPTO_KEYS_CCNX_KEYS_RSA_SIM_H_
-#define CCNS3SIM_MODEL_CRYPTO_KEYS_CCNX_KEYS_RSA_SIM_H_
-
-namespace ns3 {
-namespace ccnx {
-
-/**
- * @ingroup ccnx-crypto
- *
- * Simulated RSA keys for use in the simulated crypto suite.
- *
- * NOTE: NOT YET IMPLEMENTED
- *
- */
-class CCNxKeysRsaSim
-{
-public:
-  /**
-   * Creates the equivalent of an RSA private key.
-   *
-   * @param [in] bits 1024, 2048, or 4096
-   * @return
-   */
-  static CCNxKeysRsaSim GenerateRandomKey (unsigned bits);
-
-  CCNxKeysRsaSim (Ptr<const CCNxByteArray> data);
-  CCNxKeysRsaSim (Ptr<const CCNxKey> key);
-  virtual ~CCNxKeysRsaSim ();
-
-  Ptr<CCNxKey> GetPrivateKey () const;
-  Ptr<CCNxKey> GetPublicKey () const;
-
-  Ptr<CCNxByteArray> Serialze () const;
-};
-
-}   /* namespace ccnx */
-} /* namespace ns3 */
-
-#endif /* CCNS3SIM_MODEL_CRYPTO_KEYS_CCNX_KEYS_RSA_SIM_H_ */

@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -53,34 +53,58 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#include "ns3/assert.h"
-#include "ns3/ccnx-crypto.h"
+#ifndef CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_SSTANDARD_CONTENT_WITH_TEST_METHODS_STORE_H_
+#define CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_SSTANDARD_CONTENT_WITH_TEST_METHODS_STORE_H_
 
-#include "ns3/ccnx-verifier-rsa-sim.h"
-#include "ccnx-verifier-rsa-factory.h"
+#include <map>
+#include "ns3/ccnx-content-store.h"
+#include "ns3/ccnx-standard-content-store-entry.h"
+#include "ns3/ccnx-standard-forwarder-work-item.h"
+#include "ns3/ccnx-delay-queue.h"
+#include "ns3/ccnx-name.h"
+#include "ns3/ccnx-hash-value.h"
+#include "ns3/log.h"
 
-using namespace ns3;
-using namespace ns3::ccnx;
+namespace ns3 {
+namespace ccnx {
 
-Ptr<CCNxVerifier>
-CCNxVerifierRsaFactory::CreateVerifier ()
+class CCNxStandardContentStoreWithTestMethods : public CCNxStandardContentStore
 {
-  Ptr<CCNxVerifier> verifier = Ptr<CCNxVerifier> (0);
+public:
 
-  switch (CCNxCrypto::GetMode ())
-    {
-    case CCNxCrypto::CCNxCryptoMode_Simulated:
-      // we have to do the "new" here because it is protected and cannot be done in Ptr().
-      verifier = DynamicCast< CCNxVerifier, CCNxVerifierRsaSim > (CreateObject<CCNxVerifierRsaSim> ());
-      break;
+  /**
+   * Returns the number of content object in the hash map.
+   *
+   * @return The number of objects in the hash map.
+   */
+  virtual size_t GetMapByHashCount() const
+  {
+    return m_csByHash.size ();
+  }
+  /**
+   * Returns the number of content object in the name map.
+   *
+   * @return The number of objects in the name map.
+   */
+  virtual size_t GetMapByNameCount() const
+  {
+    return m_csByName.size ();
+  }
+  /**
+   * Returns the number of content object in the nameKeyid map.
+   *
+   * @return The number of objects in the nameKeyid map.
+   */
+  virtual size_t GetMapByNameKeyidCount() const
+  {
+      return m_csByNameKeyid.size ();
+  }
 
-    case CCNxCrypto::CCNxCryptoMode_Implemented:
-      NS_ASSERT_MSG (false, "Not implemented");
-      break;
 
-    default:
-      NS_ASSERT_MSG (false, "Unsupported mode: " << CCNxCrypto::GetMode ());
-      break;
-    }
-  return verifier;
-}
+
+};
+
+}   /* namespace ccnx */
+} /* namespace ns3 */
+
+#endif /* CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_SSTANDARD_CONTENT_WITH_TEST_METHODS_STORE_H_ */

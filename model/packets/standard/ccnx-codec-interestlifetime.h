@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -92,6 +92,14 @@ public:
    uint32_t GetSerializedSize (Ptr<CCNxPerHopHeaderEntry> perhopEntry);
 
    void Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator output);
+
+   /**
+    * Display this codec's state to the provided output stream.
+    *
+    * @param [in] perhopEntry The Entry to be printed
+    * @param [in] os The output stream to write to
+    */
+   void Print (Ptr<CCNxPerHopHeaderEntry> perhopEntry, std::ostream &os) const;
 };
 
 } // namespace ccnx
