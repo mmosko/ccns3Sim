@@ -168,6 +168,7 @@ def build(bld):
         'model/routing/ccnx-routing-protocol.cc',
         # packets
         'model/packets/ccnx-packet.cc',
+        'model/packets/ccnx-type-identifier.cc',
         'model/packets/standard/ccnx-codec-registry.cc',
         'model/packets/standard/ccnx-codec-contentobject.cc',
         'model/packets/standard/ccnx-codec-fixedheader.cc',
@@ -297,6 +298,7 @@ def build(bld):
         'model/routing/ccnx-routing-protocol.h',
         # packets
         'model/packets/ccnx-packet.h',
+        'model/packets/ccnx-type-identifier.h',
         'model/packets/ccnx-type-registry.h',
         'model/packets/standard/ccnx-codec-registry.h',
         'model/packets/standard/ccnx-codec-contentobject.h',

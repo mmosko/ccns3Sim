@@ -93,19 +93,14 @@ public:
   virtual Ptr<CCNxKeyId> GetKeyId () const = 0;
 
   /**
-   * Returns the crypto suite used by the instance of CCNxValidation.
-   *
-   * @return cryptosuite The cryptosuite used by the validation.
+   * Inside the ValidationAlgorithm section, each crypto suite defines its own
+   * TLV type.  This is used to get the appropriate codec for the cryptosuite.
    */
-  virtual CCNxCryptoSuite::CryptoSuiteType GetCryptoSuite () const = 0;
+  virtual uint16_t GetInstanceCryptoSuiteType (void) const = 0;
 
-  /**
-   * Returns the codec to use with this message type.  THis will be specific to
-   * the actual implementation class.
-   *
-   * @return
-   */
-  virtual Ptr<ns3::Object> GetCodec () = 0;
+  virtual std::ostream & Print(std::ostream &os) const = 0;
+
+
 };
 
 }   /* namespace ccnx */
