@@ -172,6 +172,8 @@ public:
    */
   Ptr<CCNxHashValue> GetContentObjectHash (void) const;
 
+  std::ostream & Print(std::ostream &os) const;
+
 protected:
   /**
    * Generic packet creation, use one of the static factories.

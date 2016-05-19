@@ -99,6 +99,7 @@ def build(bld):
         'model/messages/ccnx-time.cc',
         'model/messages/ccnx-validation-algorithm.cc',
         'model/messages/ccnx-validation-payload.cc',
+        'model/messages/ccnx-field.cc',
         'model/messages/validation/publickey/ccnx-validation-publickey.cc',
         # Crypto
         'model/crypto/ccnx-crypto.cc',
@@ -167,9 +168,11 @@ def build(bld):
         'model/routing/static/ccnx-static-routing-protocol.cc',
         'model/routing/ccnx-routing-protocol.cc',
         # packets
+        'model/packets/ccnx-codec.cc',
         'model/packets/ccnx-packet.cc',
         'model/packets/ccnx-type-identifier.cc',
-        'model/packets/standard/ccnx-codec-registry.cc',
+        'model/packets/ccnx-codec-registry.cc',
+
         'model/packets/standard/ccnx-codec-contentobject.cc',
         'model/packets/standard/ccnx-codec-fixedheader.cc',
         'model/packets/standard/ccnx-codec-interest.cc',
@@ -213,6 +216,7 @@ def build(bld):
         'model/messages/ccnx-buffer.h',
         'model/messages/ccnx-byte-array.h',
         'model/messages/ccnx-contentobject.h',
+        'model/messages/ccnx-field.h',
         'model/messages/ccnx-fixedheader.h',
         'model/messages/ccnx-perhopheaderentry.h',
         'model/messages/ccnx-interestlifetime.h',
@@ -297,10 +301,13 @@ def build(bld):
         'model/routing/ccnx-routing-error.h',
         'model/routing/ccnx-routing-protocol.h',
         # packets
+        'model/packets/ccnx-codec.h',
+        'model/packets/ccnx-field-codec.h',
         'model/packets/ccnx-packet.h',
         'model/packets/ccnx-type-identifier.h',
         'model/packets/ccnx-type-registry.h',
-        'model/packets/standard/ccnx-codec-registry.h',
+        'model/packets/ccnx-codec-registry.h',
+
         'model/packets/standard/ccnx-codec-contentobject.h',
         'model/packets/standard/ccnx-codec-fixedheader.h',
         'model/packets/standard/ccnx-codec-interest.h',

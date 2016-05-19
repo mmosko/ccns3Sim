@@ -55,8 +55,8 @@
 
 #include "ns3/log.h"
 #include "ns3/ccnx-tlv.h"
-#include "ccnx-codec-registry.h"
-#include "ccnx-codec-perhopheader.h"
+#include "ns3/ccnx-codec-registry.h"
+#include "ns3/ccnx-codec-perhopheader.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
