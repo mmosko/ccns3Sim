@@ -29,8 +29,7 @@ namespace ns3
       CCNxCodec ();
       virtual ~CCNxCodec ();
       static TypeId GetTypeId();
-      virtual TypeId GetInstanceTypeId (void) const = 0;
-
+      virtual TypeId GetInstanceTypeId () const = 0;
     };
 
   } /* namespace ccnx */

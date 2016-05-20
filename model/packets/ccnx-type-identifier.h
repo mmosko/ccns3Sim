@@ -56,10 +56,10 @@
 #ifndef CCNS3SIM_MODEL_PACKETS_CCNX_TYPE_IDENTIFIER_H_
 #define CCNS3SIM_MODEL_PACKETS_CCNX_TYPE_IDENTIFIER_H_
 
+#include <ostream>
 #include <string>
 #include <vector>
 
-#include "ns3/simple-ref-count.h"
 namespace ns3
 {
   namespace ccnx
@@ -69,68 +69,113 @@ namespace ns3
     /**
      * @ingroup ccnx-packet
      *
+     * NOTE: The text below describes the implementation plan, but the current code does
+     * not follow this in complete detail.  Currently, the FixedHeader, PerHopHeader,
+     * and Interest/ContentObject codecs are not programmable. Only the codecs for fields
+     * inside an Interest, Content Object, and Validation sections are programmable.
+     *
+     * These codecs are set in the provided implementation.  The user may replace them
+     * or add their own codecs for their own types.
+     *
+     * - 3.1.<type> = Interest fields
+     *    - 3.1.0 = Name
+     *    - 3.1.1 - Payload
+     *    - 3.1.2 = KeyIdRestriction
+     *    - 3.1.3 = ContentObjectHashRestriction
+     *
+     * - 3.2.<type> = Content Object
+     *    - 3.2.0 = Name
+     *    - 3.2.1 = Payload
+     *    - 3.2.5 = PayloadType
+     *    - 3.2.6 = Expiry
+     *
+     * - 3.3.<type> = Validation Algorithm
+     *    - 3.3.0x1FFF = Opaque CryptoSuite
+     *    - 3.3.0x1FFF.9 = Opaque CryptoSuite KeyId
+     *
+     * - 4.<type> = Name Segment Codecs
+     *    - 4.1 = Name Segment
+     *    - 4.2 = IPID
+     *    - 4.16 = Chunk
+     *    - 4.19 = Version
+     *    - 4.0x1000 = App0
+     *    - 4.0x1001 = App1
+     *    - 4.0x1002 = App2
+     *    - 4.0x1003 = App3
+     *
+     * @subsection Implementation Plan
+     *
      * The ccns3Sim packet encoder/decoder uses a SNMP MIB OID style identifier to
      * specify the codec (encoder/decoder) for each field in a packet.  We call these
      * Type Identifiers (TIDs).  This class manages the CCNx TLV Type Identifers (TIDs).
      *
      * This method allows complete packet format variability.  We only provide codec implementations
-     * for the CCNx 1.0 TLV format, but a user could replace the "0" codec to work with any packet
+     * for the CCNx 1.0 TLV format, but a user could replace the "" (empty string) codec to work with any packet
      * format, so long as one can determine it from the leading bytes of the packet.
      *
      * The top-level OID value represents the section of the packet:
-     * 0 = Packet Codec
+     * "" (empty) = Packet Codec
      *
      * TODO: Add a symbolic name, so a TID could be presented as something like
-     * "Packet.FixedHeader.PT_INTEREST", etc.
+     * "FixedHeader.PT_INTEREST", etc.
      *
-     * @subsection CCNx 1.0 Packet Codec
-     * The default "0" codec implements the CCNx 1.0 TLV packet format.  The user could replace
-     * this codec to use, for example, the NDN packet format.
+     * @subsubsection CCNx 1.0 Packet Codec
+     * The default "" (empty) codec implements the CCNx 1.0 TLV packet format.  Currently, this
+     * codec is not able to be changed and is only implemented in ccnx-packet.cc.
      *
-     * 0.1 = Fixed Header Codec
-     * 0.2 = Per Hop header Codec
-     * 0.3 = Packet Payload Codec
+     * - 1 = Fixed Header Codec (not implemented yet)
+     * - 2 = Per Hop header Codec (implemented as CCNxCodecPerHopHeader, not using this scheme yet)
+     * - 3 = Packet Body Codec (uses this scheme)
+     * - 4 = Name Segment Codecs
      *
-     * @subsection Fixed Header
+     * @subsubsection Fixed Header
      * The fixed header is defined by Version then by PacketType.  There is currenlty only
      * the "version 2" codec:
      *
-     * 0.1.2.<packetType> defines the codec for the fixed header based on the packet type.
+     * 1.2.<packetType> defines the codec for the fixed header based on the packet type.
      * This allows the user to add new packet types and specify a codec for it.
      *
-     * @subsection PerHop Headers
+     * @subsubsection PerHop Headers
      * The per-hop header section is a list of TLVs.  Each TLV codec
      * is referenced as:
-     * 0.2.<tlvType>
+     * - 2.<tlvType>
      *
-     * @subsection Packet Payload
+     * @subsubsection Packet Body
      * The packet payload is the CCNx message plus Validation Algorithm plus Validation Payload.
      *
-     * 0.3.1 = Interest
-     * 0.3.2 = Content Object
-     * 0.3.3 = Validation Algorithm
-     * 0.3.4 = Validation Payload
+     * The 3.<tlvtype> TID prefix is used for the body of the packet.  There are currently only
+     * four TLV types defined in this TID prefix:
      *
-     * @subsection CCNxName
-     * Within an Interest and ContentObject, the default codec for the CCNxName (0.3.1.0 and 0.3.2.0)
+     * - 3.1 = Interest
+     * - 3.2 = Content Object
+     * - 3.3 = Validation Algorithm
+     * - 3.4 = Validation Payload
+     *
+     * @subsubsection CCNxName
+     * Within an Interest and ContentObject, the default codec for the CCNxName (3.1.0 and 3.2.0)
      * use the CCNxCodecName class.  This uses the CCNxName registry of name TLV types to dereference the
      * codec.  It is a separate registry from the TLV identifier registry specified here.  It is flat,
      * not hierarchical.
      *
-     * @subsection Crypto Suite
+     * - 4.1 = Name Segment
+     * - 4.2 = IPID
+     * - 4.16 = Chunk
+     * - 4.19 = Version
+     *
+     * @subsubsection Crypto Suite
      * Within the CCNxValidationAlgorithm, the CryptoSuite uses this same TLV Identifier registry.  For
      * example:
      *
-     * 0.3.3.2 = CRC32C
-     * 0.3.3.4 = HMAC-SHA256
-     * 0.3.3.5 = VMAC-128
-     * 0.3.3.6 = RSA-SHA256
-     * 0.3.3.7 = EC-SECP-256K1
-     * 0.3.3.8 = EC-SECP-384R1
+     * - 3.3.2 = CRC32C
+     * - 3.3.4 = HMAC-SHA256
+     * - 3.3.5 = VMAC-128
+     * - 3.3.6 = RSA-SHA256
+     * - 3.3.7 = EC-SECP-256K1
+     * - 3.3.8 = EC-SECP-384R1
      *
      * A user may add their own crypto suite by adding (or replacing) the above TIDs.
      */
-    class CCNxTypeIdentifier : public SimpleRefCount<CCNxTypeIdentifier>
+    class CCNxTypeIdentifier
     {
     public:
       typedef unsigned IdentiferType;
@@ -266,6 +311,8 @@ namespace ns3
        * @param offset
        */
       IdentiferType operator [] (size_t offset) const;
+
+      friend std::ostream & operator << (std::ostream &os, const CCNxTypeIdentifier &tid);
 
     protected:
       std::vector <IdentiferType> m_components;

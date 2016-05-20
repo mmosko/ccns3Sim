@@ -59,7 +59,7 @@
 
 #include "ns3/nfp-advertise.h"
 #include "ns3/ccnx-name.h"
-#include "ns3/ccnx-codec-name.h"
+#include "ns3/ccnx-header-name.h"
 #include "ns3/ccnx-tlv.h"
 
 using namespace ns3;
@@ -72,8 +72,8 @@ class TestState
 public:
   Ptr<const CCNxName> anchorName;
   Ptr<const CCNxName> prefix;
-  CCNxCodecName anchorNameCodec;
-  CCNxCodecName prefixCodec;
+  CCNxHeaderName anchorNameCodec;
+  CCNxHeaderName prefixCodec;
   uint32_t anchorSeqnum;
   uint16_t distance;
 

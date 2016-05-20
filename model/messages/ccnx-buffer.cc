@@ -143,3 +143,10 @@ CCNxBuffer::Equals (CCNxBuffer const &other) const
     }
   return result;
 }
+
+std::ostream &
+CCNxBuffer::Print(std::ostream &os) const
+{
+  os << "CCNxBuffer::Print not implemented";
+  return os;
+}

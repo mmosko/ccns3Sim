@@ -54,7 +54,7 @@
  */
 
 #include "ns3/log.h"
-#include "ns3/ccnx-codec-name.h"
+#include "ns3/ccnx-header-name.h"
 #include "ns3/ccnx-schema-v1.h"
 #include "ns3/ccnx-tlv.h"
 #include "ns3/ccnx-name-builder.h"
@@ -62,25 +62,25 @@
 using namespace ns3;
 using namespace ns3::ccnx;
 
-NS_LOG_COMPONENT_DEFINE ("CCNxCodecName");
+NS_LOG_COMPONENT_DEFINE ("CCNxHeaderName");
 
-NS_OBJECT_ENSURE_REGISTERED (CCNxCodecName);
+NS_OBJECT_ENSURE_REGISTERED (CCNxHeaderName);
 
 static const uint16_t typeLengthBytes = 4;
 
 
 TypeId
-CCNxCodecName::GetTypeId (void)
+CCNxHeaderName::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::ccnx::CCNxCodecName")
+  static TypeId tid = TypeId ("ns3::ccnx::CCNxHeaderName")
     .SetParent<Header> ()
     .SetGroupName ("CCNx")
-    .AddConstructor<CCNxCodecName> ();
+    .AddConstructor<CCNxHeaderName> ();
   return tid;
 }
 
 TypeId
-CCNxCodecName::GetInstanceTypeId (void) const
+CCNxHeaderName::GetInstanceTypeId (void) const
 {
   return GetTypeId ();
 }
@@ -88,7 +88,7 @@ CCNxCodecName::GetInstanceTypeId (void) const
 // virtual from Header
 
 uint32_t
-CCNxCodecName::GetSerializedSize (void) const
+CCNxHeaderName::GetSerializedSize (void) const
 {
   // TODO: Cache this result
   uint32_t bytes = typeLengthBytes;   // opening T_NAME
@@ -105,7 +105,7 @@ CCNxCodecName::GetSerializedSize (void) const
 }
 
 void
-CCNxCodecName::Serialize (Buffer::Iterator start) const
+CCNxHeaderName::Serialize (Buffer::Iterator start) const
 {
   uint32_t bytes = GetSerializedSize ();
   NS_ASSERT_MSG (bytes >= typeLengthBytes, "Serialized length must be at least 4 bytes");
@@ -125,7 +125,7 @@ CCNxCodecName::Serialize (Buffer::Iterator start) const
 }
 
 uint32_t
-CCNxCodecName::Deserialize (Buffer::Iterator start)
+CCNxHeaderName::Deserialize (Buffer::Iterator start)
 {
   NS_ASSERT_MSG (start.GetSize () >= CCNxTlv::GetTLSize (), "Must have at least 4 bytes in buffer");
 
@@ -169,7 +169,7 @@ CCNxCodecName::Deserialize (Buffer::Iterator start)
 }
 
 void
-CCNxCodecName::Print (std::ostream &os) const
+CCNxHeaderName::Print (std::ostream &os) const
 {
   if (m_name)
     {
@@ -181,28 +181,28 @@ CCNxCodecName::Print (std::ostream &os) const
     }
 }
 
-CCNxCodecName::CCNxCodecName () : m_name (0)
+CCNxHeaderName::CCNxHeaderName () : m_name (0)
 {
   // empty
 }
 
-CCNxCodecName::~CCNxCodecName ()
+CCNxHeaderName::~CCNxHeaderName ()
 {
   // empty (use DoDispose)
 }
 
-Ptr<const CCNxName> CCNxCodecName::GetHeader () const
+Ptr<const CCNxName> CCNxHeaderName::GetHeader () const
 {
   return m_name;
 }
 
-void CCNxCodecName::SetHeader (Ptr<const CCNxName> name)
+void CCNxHeaderName::SetHeader (Ptr<const CCNxName> name)
 {
   m_name = name;
 }
 
 uint16_t
-CCNxCodecName::NameSegmentTypeToSchemaValue (CCNxNameSegmentType type)
+CCNxHeaderName::NameSegmentTypeToSchemaValue (CCNxNameSegmentType type)
 {
   uint16_t schemaValue = 0;
   switch (type)
@@ -239,7 +239,7 @@ CCNxCodecName::NameSegmentTypeToSchemaValue (CCNxNameSegmentType type)
 }
 
 CCNxNameSegmentType
-CCNxCodecName::SchemaValueToNameSegmentType (uint16_t type)
+CCNxHeaderName::SchemaValueToNameSegmentType (uint16_t type)
 {
   CCNxNameSegmentType nameSegmentType = CCNxNameSegment_Name;
   switch (type)
@@ -276,7 +276,7 @@ CCNxCodecName::SchemaValueToNameSegmentType (uint16_t type)
 }
 
 bool
-CCNxCodecName::Equals (CCNxCodecName const & other) const
+CCNxHeaderName::Equals (CCNxHeaderName const & other) const
 {
   bool result = false;
   if (m_name && other.m_name)

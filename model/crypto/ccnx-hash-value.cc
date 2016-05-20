@@ -87,6 +87,10 @@ CCNxHashValue::CCNxHashValue (Ptr<const CCNxByteArray> byteArray)
   m_value = byteArray;
 }
 
+CCNxHashValue::~CCNxHashValue()
+{
+
+}
 
 Ptr<const CCNxByteArray>
 CCNxHashValue::GetValue () const
@@ -122,4 +126,11 @@ CCNxHashValue::CreateBuffer () const
 {
   // FIXME
   return Ptr<CCNxBuffer> (0);
+}
+
+std::ostream &
+CCNxHashValue::Print(std::ostream &os) const
+{
+  os << "CCNxHashValue::Print not implemented";
+  return os;
 }

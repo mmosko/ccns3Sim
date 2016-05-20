@@ -75,10 +75,6 @@ namespace ccnx {
 class CCNxFieldCodec : public CCNxCodec
 {
 public:
-  static TypeId GetTypeId (void);
-
-  virtual TypeId GetInstanceTypeId (void) const;
-
   /**
    * Constructor for CCNxFieldCodec
    */
@@ -93,13 +89,17 @@ public:
    * Implemented in a specific codec
    */
 
-  virtual Ptr<CCNxField> Deserialize (Buffer::Iterator input, const CCNxTypeIdentifier &parent, size_t *bytesRead) = 0;
+  static TypeId GetTypeId ();
 
-  virtual uint32_t GetSerializedSize (Ptr<CCNxField> packetElement) = 0;
+  virtual TypeId GetInstanceTypeId () const = 0;
 
-  virtual void Serialize (Ptr<CCNxField> packetElement, Buffer::Iterator output) = 0;
+  virtual Ptr<CCNxField> Deserialize (Buffer::Iterator &input, const CCNxTypeIdentifier &parent, size_t *bytesRead) = 0;
 
-  virtual void Print (Ptr<CCNxField> packetElement, std::ostream &os) const = 0;
+  virtual uint32_t GetSerializedSize (Ptr<const CCNxField> packetElement) = 0;
+
+  virtual void Serialize (Ptr<const CCNxField> packetElement, uint16_t tlvType, Buffer::Iterator &output) = 0;
+
+  virtual void Print (Ptr<const CCNxField> packetElement, std::ostream &os) const = 0;
 };
 
 } // namespace ccnx

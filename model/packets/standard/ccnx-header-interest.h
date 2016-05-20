@@ -53,95 +53,121 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#include "ns3/test.h"
-#include "ns3/ccnx-codec-interest.h"
-#include "../../TestMacros.h"
+#ifndef CCNS3SIM_CCNXHEADERINTEREST_H
+#define CCNS3SIM_CCNXHEADERINTEREST_H
 
-using namespace ns3;
-using namespace ns3::ccnx;
+#include "ns3/header.h"
+#include "ns3/ccnx-interest.h"
+#include "ns3/ccnx-header-name.h"
+#include "ns3/ccnx-field-codec.h"
 
-// =================================
-
-namespace TestCCNxCodecName {
-
-BeginTest (TestGetSerializedSize)
-{
-  printf ("TestGetSerializedSize DoRun\n");
-  Ptr<const CCNxName> name = Create<CCNxName> ("ccnx:/name=apple/ver=pie/chunk=crust");
-  CCNxCodecName nc;
-  nc.SetHeader (name);
-
-  size_t test = nc.GetSerializedSize ();
-  NS_TEST_EXPECT_MSG_EQ (test, 29, "wrong size");
-}
-EndTest ()
-
-BeginTest (TestSerialize)
-{
-  printf ("TestSerialize DoRun\n");
-
-  Ptr<const CCNxName> name = Create<CCNxName> ("ccnx:/name=apple/ver=pie/chunk=crust");
-  CCNxCodecName cn;
-  cn.SetHeader (name);
-
-  Buffer buffer (0);
-  buffer.AddAtStart (cn.GetSerializedSize ());
-  cn.Serialize (buffer.Begin ());
-
-  NS_TEST_EXPECT_MSG_EQ (buffer.GetSize (), cn.GetSerializedSize (), "Wrong size");
-
-  const uint8_t truth[] = {
-    0, 0, 0, 25,
-    0, 1, 0, 5, 'a', 'p', 'p', 'l', 'e',
-    0, 19, 0, 3, 'p', 'i', 'e',
-    0, 16, 0, 5, 'c', 'r', 'u', 's', 't'
-  };
-
-  uint8_t test[29];
-  buffer.CopyData (test, 29);
-
-  hexdump ("truth", sizeof(truth), truth);
-  hexdump ("test ", sizeof(test), test);
-
-  NS_TEST_EXPECT_MSG_EQ (memcmp (truth, test, 29), 0, "Data in buffer wrong");
-}
-EndTest ()
-
-BeginTest (TestDeserialize)
-{
-  printf ("TestDeserialize DoRun\n");
-
-  // serialize it then make sure we got what we expected
-  Ptr<const CCNxName> name = Create<CCNxName> ("ccnx:/name=apple/ver=pie/chunk=crust");
-  CCNxCodecName cn;
-  cn.SetHeader (name);
-
-  Buffer buffer (0);
-  buffer.AddAtStart (cn.GetSerializedSize ());
-  cn.Serialize (buffer.Begin ());
-
-  CCNxCodecName cntest;
-  cntest.Deserialize (buffer.Begin ());
-
-  Ptr<const CCNxName> test = cntest.GetHeader ();
-  NS_TEST_EXPECT_MSG_EQ (name->Equals (*test), true, "Data in buffer wrong");
-}
-EndTest ()
+namespace ns3 {
+namespace ccnx {
 
 /**
- * \ingroup ccnx-test
+ * @ingroup ccnx-packet
  *
- * \brief Test Suite for CCNxCodecName
+ * Codec for reading/writing a CCNxInterest message
  */
-static class TestSuiteCCNxCodecName : public TestSuite
+class CCNxHeaderInterest : public Header
 {
 public:
-  TestSuiteCCNxCodecName () : TestSuite ("ccnx-codec-name", UNIT)
-  {
-    AddTestCase (new TestGetSerializedSize (), TestCase::QUICK);
-    AddTestCase (new TestSerialize (), TestCase::QUICK);
-    AddTestCase (new TestDeserialize (), TestCase::QUICK);
-  }
-} g_TestSuiteCCNxCodecName;
+  /**
+   * Return the ns3::Object type
+   * @return The RTTI of this object
+   */
+  static TypeId GetTypeId (void);
 
-} // namespace TestCCNxCodecName
+  virtual TypeId GetInstanceTypeId (void) const;
+
+  // virtual from Header
+
+  /**
+   * Computes the byte length of the encoded TLV.  Does not do
+   * any encoding (it's const).
+   */
+  virtual uint32_t GetSerializedSize (void) const;
+
+  /**
+   * Serializes this object into the Buffer::Iterator.  it is the responsibility
+   * of the caller to ensure there is at least GetSerializedSize() bytes available.
+   *
+   * @param [in] output The buffer position to begin writing.
+   */
+  virtual void Serialize (Buffer::Iterator output) const;
+
+  /**
+   * Reads from the Buffer::Iterator and creates an object instantiation of the buffer.
+   *
+   * The buffer should point to the beginning of the T_OBJECT TLV.
+   *
+   * @param [in] input The buffer to read from
+   * @return The number of bytes processed.
+   */
+  virtual uint32_t Deserialize (Buffer::Iterator input);
+
+  /**
+   * Display this codec's state to the provided output stream.
+   *
+   * @param [in] os The output stream to write to
+   */
+  virtual void Print (std::ostream &os) const;
+
+  // subclass
+  CCNxHeaderInterest ();
+
+  virtual ~CCNxHeaderInterest ();
+
+  /**
+   * Get's the Interest's pointer.  Could be from Deserialize() or from
+   * SetHeader().
+   */
+  Ptr<CCNxInterest> GetHeader () const;
+
+  /**
+   * Sets the Interest to the given value.  Used when serializing.
+   */
+  void SetHeader (Ptr<CCNxInterest> interest);
+
+protected:
+  /**
+   * Used to initialize the standard codecs used by an Interest so we
+   * don't need to look them up every packet.
+   */
+  virtual void DoInitialize();
+
+private:
+  /**
+   * The interest to serialize (from SetHeader) or the interest we got from
+   * Deserialize().
+   */
+  Ptr<CCNxInterest> m_interest;
+
+  /**
+   * This codec is looked up from CCNxCodecRegistry when the class is created
+   * so we don't need to do a map lookup each time
+   */
+  Ptr<CCNxFieldCodec> m_nameCodec;
+
+  /**
+   * This codec is looked up from CCNxCodecRegistry when the class is created
+   * so we don't need to do a map lookup each time
+   */
+  Ptr<CCNxFieldCodec> m_keyIdRestrictionCodec;
+
+  /**
+   * This codec is looked up from CCNxCodecRegistry when the class is created
+   * so we don't need to do a map lookup each time
+   */
+  Ptr<CCNxFieldCodec> m_hashRestrictionCodec;
+
+  /**
+   * This codec is looked up from CCNxCodecRegistry when the class is created
+   * so we don't need to do a map lookup each time
+   */
+  Ptr<CCNxFieldCodec> m_payloadCodec;
+};
+}
+}
+
+#endif //CCNS3SIM_CCNXHEADERINTEREST_H

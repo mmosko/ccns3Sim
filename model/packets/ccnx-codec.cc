@@ -7,21 +7,28 @@
 
 #include "ccnx-codec.h"
 
-namespace ns3
+using namespace ns3;
+using namespace ns3::ccnx;
+
+NS_OBJECT_ENSURE_REGISTERED(CCNxCodec);
+
+TypeId
+CCNxCodec::GetTypeId ()
 {
-  namespace ccnx
-  {
+  static TypeId tid = TypeId ("ns3::ccnx::CCNxCodec")
+    .SetParent<Object> ()
+    .SetGroupName ("CCNx");
+  return tid;
+}
 
-    CCNxCodec::CCNxCodec ()
-    {
-      // TODO Auto-generated constructor stub
+CCNxCodec::CCNxCodec ()
+{
+  // TODO Auto-generated constructor stub
 
-    }
+}
 
-    CCNxCodec::~CCNxCodec ()
-    {
-      // TODO Auto-generated destructor stub
-    }
+CCNxCodec::~CCNxCodec ()
+{
+  // TODO Auto-generated destructor stub
+}
 
-  } /* namespace ccnx */
-} /* namespace ns3 */

@@ -58,7 +58,7 @@
 
 #include "ns3/header.h"
 #include "ns3/ccnx-contentobject.h"
-#include "ns3/ccnx-codec-name.h"
+#include "ns3/ccnx-header-name.h"
 
 namespace ns3 {
 namespace ccnx {
@@ -143,7 +143,7 @@ private:
    * Deserialize().
    */
   Ptr<CCNxContentObject> m_content;
-  CCNxCodecName m_nameCodec;
+  CCNxHeaderName m_nameCodec;
 
   /**
    * The start iterator points to the T_NAME Value.  It will be rewinded 4

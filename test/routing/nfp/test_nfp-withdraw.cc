@@ -57,7 +57,7 @@
 #include "../../TestMacros.h"
 
 #include "ns3/nfp-withdraw.h"
-#include "ns3/ccnx-codec-name.h"
+#include "ns3/ccnx-header-name.h"
 #include "ns3/ccnx-tlv.h"
 
 using namespace ns3;
@@ -70,8 +70,8 @@ class TestState
 public:
   Ptr<const CCNxName> anchorName;
   Ptr<const CCNxName> prefix;
-  CCNxCodecName anchorNameCodec;
-  CCNxCodecName prefixCodec;
+  CCNxHeaderName anchorNameCodec;
+  CCNxHeaderName prefixCodec;
 
   TestState ()
   {

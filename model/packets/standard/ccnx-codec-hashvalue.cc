@@ -53,114 +53,111 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_CCNXCODECINTEREST_H
-#define CCNS3SIM_CCNXCODECINTEREST_H
+#include "ns3/ccnx-codec-hashvalue.h"
+#include "ns3/ccnx-codec-registry.h"
+#include "ns3/ccnx-schema-v1.h"
+#include "ns3/ccnx-tlv.h"
+#include "ns3/ccnx-hash-value.h"
 
-#include "ns3/header.h"
-#include "ns3/ccnx-interest.h"
-#include "ns3/ccnx-codec-name.h"
+using namespace ns3;
+using namespace ns3::ccnx;
 
-namespace ns3 {
-namespace ccnx {
+NS_LOG_COMPONENT_DEFINE ("CCNxCodecHashValue");
+NS_OBJECT_ENSURE_REGISTERED(CCNxCodecHashValue);
 
-/**
- * @ingroup ccnx-packet
- *
- * Codec for reading/writing a CCNxInterest message
- */
-class CCNxCodecInterest : public Header
-{
-public:
-  /**
-   * Return the ns3::Object type
-   * @return The RTTI of this object
-   */
-  static TypeId GetTypeId (void);
-
-  virtual TypeId GetInstanceTypeId (void) const;
-
-  // virtual from Header
-
-  /**
-   * Computes the byte length of the encoded TLV.  Does not do
-   * any encoding (it's const).
-   */
-  virtual uint32_t GetSerializedSize (void) const;
-
-  /**
-   * Serializes this object into the Buffer::Iterator.  it is the responsibility
-   * of the caller to ensure there is at least GetSerializedSize() bytes available.
-   *
-   * @param [in] output The buffer position to begin writing.
-   */
-  virtual void Serialize (Buffer::Iterator output) const;
-
-  /**
-   * Reads from the Buffer::Iterator and creates an object instantiation of the buffer.
-   *
-   * The buffer should point to the beginning of the T_OBJECT TLV.
-   *
-   * @param [in] input The buffer to read from
-   * @return The number of bytes processed.
-   */
-  virtual uint32_t Deserialize (Buffer::Iterator input);
-
-  /**
-   * Display this codec's state to the provided output stream.
-   *
-   * @param [in] os The output stream to write to
-   */
-  virtual void Print (std::ostream &os) const;
-
-  // subclass
-  CCNxCodecInterest ();
-
-  virtual ~CCNxCodecInterest ();
-
-  /**
-   * Get's the Interest's pointer.  Could be from Deserialize() or from
-   * SetHeader().
-   */
-  Ptr<CCNxInterest> GetHeader () const;
-
-  /**
-   * Sets the Interest to the given value.  Used when serializing.
-   */
-  void SetHeader (Ptr<CCNxInterest> interest);
-
-private:
-  /**
-   * The interest to serialize (from SetHeader) or the interest we got from
-   * Deserialize().
-   */
-  Ptr<CCNxInterest> m_interest;
-  CCNxCodecName m_nameCodec;
-
-  /**
-   * The start iterator points to the T_NAME Value.  It will be rewinded 4
-   * bytes and passed to m_nameCodec for processing.  Side effect is that m_nameCodec
-   * will be updated with the Interest's name.
-   */
-  Ptr<const CCNxName>  DeserializeName (Buffer::Iterator &start, uint16_t length);
-
-  /**
-   * start points to the T_KEYID_REST Value.  Reads 8 bytes of U64 in network
-   * byte order and returns it in host order.  Skips 24 bytes of padding.
-   */
-  Ptr<CCNxHashValue> DeserializeKeyIdRest (Buffer::Iterator &start, uint16_t length);
-
-  /**
-   * start points to the T_HASH_REST Value.  Reads 8 bytes of U64 in network
-   * byte order and returns it in host order.  Skips 24 bytes of padding.
-   */
-  Ptr<CCNxHashValue> DeserializeHashRest (Buffer::Iterator &start, uint16_t length);
-
-  /**
-   * start points to the T_PAYLOAD Value.  Reads the whole payload.
-   */
-  Ptr<CCNxBuffer> DeserializePayload (Buffer::Iterator &start, uint16_t length);
+static bool _codecRegistered = false;
+static const char * _tidStrings[] = {
+    CCNxSchemaV1_TID_INTEREST_KEYIDREST,
+    CCNxSchemaV1_TID_INTEREST_HASHREST,
+    NULL
 };
-}
+
+static void
+_RegisterCodec()
+{
+  if (!_codecRegistered) {
+      _codecRegistered = true;
+      Ptr<CCNxFieldCodec> codec = CreateObject<CCNxCodecHashValue>();
+
+      for (int i = 0; _tidStrings[i] != NULL; ++i) {
+	  CCNxTypeIdentifier tid(_tidStrings[i]);
+	  printf("Trying to register %s\n", tid.GetTid().c_str());
+	  CCNxCodecRegistry::RegisterTidCodec(tid, codec);
+      }
+  }
 }
 
-#endif //CCNS3SIM_CCNXCODECINTEREST_H
+TypeId
+CCNxCodecHashValue::GetTypeId ()
+{
+  _RegisterCodec();
+  static TypeId tid = TypeId ("ns3::ccnx::CCNxCodecHashValue")
+    .SetParent<CCNxFieldCodec> ()
+    .AddConstructor<CCNxCodecHashValue> ()
+    .SetGroupName ("CCNx");
+  return tid;
+}
+
+CCNxCodecHashValue::CCNxCodecHashValue ()
+{
+  // empty
+}
+
+CCNxCodecHashValue::~CCNxCodecHashValue ()
+{
+  // empty
+}
+
+
+TypeId
+CCNxCodecHashValue::GetInstanceTypeId () const
+{
+  return CCNxCodecHashValue::GetTypeId ();
+}
+
+Ptr<CCNxField>
+CCNxCodecHashValue::Deserialize (Buffer::Iterator &input, const CCNxTypeIdentifier &parent, size_t *bytesRead)
+{
+  NS_LOG_FUNCTION (this << &input);
+
+  // skip the "T"
+  CCNxTlv::ReadType (input);
+  uint16_t nestedLength = CCNxTlv::ReadLength (input);
+
+  NS_ASSERT_MSG(nestedLength >= 8, "Must have at least 8 bytes to read");
+
+  uint64_t value = input.ReadNtohU64 ();
+  input.Next (nestedLength - 8); // skip the padding
+
+  NS_LOG_DEBUG ("Deserialized KeyIdRestr " << value);
+
+  *bytesRead = nestedLength + CCNxTlv::GetTLSize();
+
+  return Create<CCNxHashValue> (value);
+}
+
+uint32_t
+CCNxCodecHashValue::GetSerializedSize (Ptr<const CCNxField> packetElement)
+{
+  Ptr<const CCNxHashValue> hash = DynamicCast<const CCNxHashValue, const CCNxField>(packetElement);
+  uint32_t bytes = CCNxTlv::GetTLSize() + hash->GetValue()->size();
+  return bytes;
+}
+
+void
+CCNxCodecHashValue::Serialize (Ptr<const CCNxField> packetElement, uint16_t tlvType, Buffer::Iterator &output)
+{
+  Ptr<const CCNxHashValue> hash = DynamicCast<const CCNxHashValue, const CCNxField>(packetElement);
+
+  uint32_t bytes = GetSerializedSize(packetElement);
+  CCNxTlv::WriteTypeLength (output, tlvType, bytes - CCNxTlv::GetTLSize());
+  Ptr<CCNxBuffer> b = hash->CreateBuffer();
+  output.Write (b->Begin (), b->End ());
+}
+
+void
+CCNxCodecHashValue::Print (Ptr<const CCNxField> packetElement, std::ostream &os) const
+{
+  Ptr<const CCNxHashValue> hash = DynamicCast<const CCNxHashValue, const CCNxField>(packetElement);
+  hash->Print(os);
+}

@@ -53,78 +53,95 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_CCNXCODECNAME_H
-#define CCNS3SIM_CCNXCODECNAME_H
+#include "ns3/test.h"
+#include "ns3/ccnx-header-name.h"
+#include "../../TestMacros.h"
 
-#include <ns3/header.h>
-#include <ns3/ccnx-name.h>
+using namespace ns3;
+using namespace ns3::ccnx;
 
-namespace ns3 {
-namespace ccnx {
+// =================================
+
+namespace TestCCNxHeaderName {
+
+BeginTest (TestGetSerializedSize)
+{
+  printf ("TestGetSerializedSize DoRun\n");
+  Ptr<const CCNxName> name = Create<CCNxName> ("ccnx:/name=apple/ver=pie/chunk=crust");
+  CCNxHeaderName nc;
+  nc.SetHeader (name);
+
+  size_t test = nc.GetSerializedSize ();
+  NS_TEST_EXPECT_MSG_EQ (test, 29, "wrong size");
+}
+EndTest ()
+
+BeginTest (TestSerialize)
+{
+  printf ("TestSerialize DoRun\n");
+
+  Ptr<const CCNxName> name = Create<CCNxName> ("ccnx:/name=apple/ver=pie/chunk=crust");
+  CCNxHeaderName cn;
+  cn.SetHeader (name);
+
+  Buffer buffer (0);
+  buffer.AddAtStart (cn.GetSerializedSize ());
+  cn.Serialize (buffer.Begin ());
+
+  NS_TEST_EXPECT_MSG_EQ (buffer.GetSize (), cn.GetSerializedSize (), "Wrong size");
+
+  const uint8_t truth[] = {
+    0, 0, 0, 25,
+    0, 1, 0, 5, 'a', 'p', 'p', 'l', 'e',
+    0, 19, 0, 3, 'p', 'i', 'e',
+    0, 16, 0, 5, 'c', 'r', 'u', 's', 't'
+  };
+
+  uint8_t test[29];
+  buffer.CopyData (test, 29);
+
+  hexdump ("truth", sizeof(truth), truth);
+  hexdump ("test ", sizeof(test), test);
+
+  NS_TEST_EXPECT_MSG_EQ (memcmp (truth, test, 29), 0, "Data in buffer wrong");
+}
+EndTest ()
+
+BeginTest (TestDeserialize)
+{
+  printf ("TestDeserialize DoRun\n");
+
+  // serialize it then make sure we got what we expected
+  Ptr<const CCNxName> name = Create<CCNxName> ("ccnx:/name=apple/ver=pie/chunk=crust");
+  CCNxHeaderName cn;
+  cn.SetHeader (name);
+
+  Buffer buffer (0);
+  buffer.AddAtStart (cn.GetSerializedSize ());
+  cn.Serialize (buffer.Begin ());
+
+  CCNxHeaderName cntest;
+  cntest.Deserialize (buffer.Begin ());
+
+  Ptr<const CCNxName> test = cntest.GetHeader ();
+  NS_TEST_EXPECT_MSG_EQ (name->Equals (*test), true, "Data in buffer wrong");
+}
+EndTest ()
 
 /**
- * \ingroup ccns-packet
+ * \ingroup ccnx-test
  *
- * While this codec is written as a Header subclass, it is not intended
- * for independent use as a packet header.  It is written this way so it
- * is uniform with the other Codecs.
- *
- * It is called from within the Interest and ContentObject Codec.
- *
- *
+ * \brief Test Suite for CCNxHeaderName
  */
-class CCNxCodecName : public Header
+static class TestSuiteCCNxHeaderName : public TestSuite
 {
 public:
-  // virtual from Object (really Chunk)
+  TestSuiteCCNxHeaderName () : TestSuite ("ccnx-header-name", UNIT)
+  {
+    AddTestCase (new TestGetSerializedSize (), TestCase::QUICK);
+    AddTestCase (new TestSerialize (), TestCase::QUICK);
+    AddTestCase (new TestDeserialize (), TestCase::QUICK);
+  }
+} g_TestSuiteCCNxHeaderName;
 
-  static TypeId GetTypeId (void);
-
-  virtual TypeId GetInstanceTypeId (void) const;
-
-  // virtual from Header
-
-  virtual uint32_t GetSerializedSize (void) const;
-
-  virtual void Serialize (Buffer::Iterator start) const;
-
-  virtual uint32_t Deserialize (Buffer::Iterator start);
-
-  virtual void Print (std::ostream &os) const;
-
-  // subclass
-  CCNxCodecName ();
-
-  virtual ~CCNxCodecName ();
-
-  /**
-   * Get the name that was Deserialized.
-   */
-  Ptr<const CCNxName> GetHeader () const;
-
-  /**
-   * Set the name to be serialized
-   */
-  void SetHeader (Ptr<const CCNxName> name);
-
-  /**
-   * Determines if two name codecs are equal.
-   *
-   * To be equal, the name codecs must have equal names.
-   *
-   * @param other The CCNxNameCodec to campare against
-   * @return true if equal, false otherwise.
-   */
-  bool Equals (CCNxCodecName const & other) const;
-
-private:
-  Ptr<const CCNxName> m_name;
-
-  static uint16_t NameSegmentTypeToSchemaValue (CCNxNameSegmentType type);
-  static CCNxNameSegmentType SchemaValueToNameSegmentType (uint16_t type);
-};
-
-}
-}
-
-#endif //CCNS3SIM_CCNXCODECNAME_H
+} // namespace TestCCNxHeaderName

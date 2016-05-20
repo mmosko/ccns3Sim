@@ -237,3 +237,9 @@ ns3::ccnx::operator<< (std::ostream& os, CCNxName const& name)
   return os;
 }
 
+std::ostream &
+CCNxName::Print(std::ostream &os) const
+{
+  os << *this;
+  return os;
+}

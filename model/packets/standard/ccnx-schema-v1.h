@@ -57,6 +57,7 @@
 #define CCNS3SIM_CCNXSCHEMAV1_H
 
 #include <stdint.h>
+#include "ns3/ccnx-type-identifier.h"
 
 namespace ns3 {
 namespace ccnx {
@@ -117,6 +118,15 @@ public:
   static const uint16_t T_PUBLICKEY = 0x000B;
   static const uint16_t T_SIGTIME = 0x000F;
 };
+
+static const char * CCNxSchemaV1_TID_BODY = "3";
+static const char * CCNxSchemaV1_TID_INTEREST = "3.1";
+static const char * CCNxSchemaV1_TID_INTEREST_NAME = "3.1.0";
+static const char * CCNxSchemaV1_TID_INTEREST_PAYLOAD = "3.1.1";
+static const char * CCNxSchemaV1_TID_INTEREST_KEYIDREST = "3.1.2";
+static const char * CCNxSchemaV1_TID_INTEREST_HASHREST = "3.1.3";
+
+static const char * CCNxSchemaV1_TID_END = "999999";
 }
 }
 #endif //CCNS3SIM_CCNXSCHEMAV1_H

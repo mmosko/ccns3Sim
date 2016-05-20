@@ -59,7 +59,7 @@
 #include "ns3/log.h"
 #include "ns3/nfp-payload.h"
 #include "ns3/ccnx-name.h"
-#include "ns3/ccnx-codec-name.h"
+#include "ns3/ccnx-header-name.h"
 #include "ns3/ccnx-tlv.h"
 
 using namespace ns3;
@@ -85,7 +85,7 @@ public:
   Ptr<const CCNxName> prefixName_1;
   Ptr<const CCNxName> prefixName_2;
 
-  CCNxCodecName routerNameCodec;
+  CCNxHeaderName routerNameCodec;
 
   Ptr<NfpAdvertise> adv1;
   Ptr<NfpAdvertise> adv2;

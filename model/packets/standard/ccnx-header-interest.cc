@@ -54,61 +54,78 @@
  */
 
 #include "ns3/log.h"
-#include "ns3/ccnx-codec-interest.h"
+#include "ns3/ccnx-header-interest.h"
 #include "ns3/ccnx-schema-v1.h"
 #include "ns3/ccnx-tlv.h"
+#include "ns3/ccnx-type-identifier.h"
+#include "ns3/ccnx-codec-registry.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
 
-NS_LOG_COMPONENT_DEFINE ("CCNxCodecInterest");
+NS_LOG_COMPONENT_DEFINE ("CCNxHeaderInterest");
 
-NS_OBJECT_ENSURE_REGISTERED (CCNxCodecInterest);
+NS_OBJECT_ENSURE_REGISTERED (CCNxHeaderInterest);
+
+static const CCNxTypeIdentifier _tidName("3.1.0");
+static const CCNxTypeIdentifier _tidPayload("3.1.1");
+static const CCNxTypeIdentifier _tidKeyIdRestr("3.1.2");
+static const CCNxTypeIdentifier _tidHashRestr("3.1.3");
 
 TypeId
-CCNxCodecInterest::GetTypeId (void)
+CCNxHeaderInterest::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::ccnx::CCNxCodecInterest")
+  static TypeId tid = TypeId ("ns3::ccnx::CCNxHeaderInterest")
     .SetParent<Header> ()
     .SetGroupName ("CCNx")
-    .AddConstructor<CCNxCodecInterest> ();
+    .AddConstructor<CCNxHeaderInterest> ();
   return tid;
 }
 
 TypeId
-CCNxCodecInterest::GetInstanceTypeId (void) const
+CCNxHeaderInterest::GetInstanceTypeId (void) const
 {
   return GetTypeId ();
+}
+
+
+void
+CCNxHeaderInterest::DoInitialize()
+{
+  Ptr<CCNxFieldCodec> m_nameCodec = CCNxCodecRegistry::LookupTidCodec(_tidName);
+  Ptr<CCNxFieldCodec> m_keyIdRestrictionCodec = CCNxCodecRegistry::LookupTidCodec(_tidKeyIdRestr);
+  Ptr<CCNxFieldCodec> m_hashRestrictionCodec = CCNxCodecRegistry::LookupTidCodec(_tidHashRestr);
+  Ptr<CCNxFieldCodec> m_payloadCodec = CCNxCodecRegistry::LookupTidCodec(_tidPayload);
 }
 
 // virtual from Header
 
 uint32_t
-CCNxCodecInterest::GetSerializedSize (void) const
+CCNxHeaderInterest::GetSerializedSize (void) const
 {
   uint32_t bytes = CCNxTlv::GetTLSize ();     // first header
-  bytes += m_nameCodec.GetSerializedSize (); // name TLV
+  bytes += m_nameCodec->GetSerializedSize (m_interest->GetName()); // name TLV
 
   if (m_interest->GetKeyidRestriction ())
     {
-      bytes += CCNxTlv::GetTLSize () + 32;
+      bytes += m_keyIdRestrictionCodec->GetSerializedSize(m_interest->GetKeyidRestriction ());
     }
 
   if (m_interest->GetHashRestriction ())
     {
-      bytes += CCNxTlv::GetTLSize () + 32;
+      bytes += m_hashRestrictionCodec->GetSerializedSize(m_interest->GetHashRestriction ());
     }
 
   if (m_interest->GetPayload ())
     {
-      bytes += CCNxTlv::GetTLSize () + m_interest->GetPayload ()->GetSize ();
+      bytes += m_payloadCodec->GetSerializedSize(m_interest->GetPayload ());
     }
 
   return bytes;
 }
 
 void
-CCNxCodecInterest::Serialize (Buffer::Iterator outputIterator) const
+CCNxHeaderInterest::Serialize (Buffer::Iterator outputIterator) const
 {
   NS_LOG_FUNCTION (this << &outputIterator);
 
@@ -119,36 +136,26 @@ CCNxCodecInterest::Serialize (Buffer::Iterator outputIterator) const
   CCNxTlv::WriteTypeLength (outputIterator, CCNxSchemaV1::T_INTEREST, bytes - CCNxTlv::GetTLSize ());
 
   // The name codec includes the T_NAME TLV
-  m_nameCodec.Serialize (outputIterator);
-
-  // The call to Serialize is not by reference, so start is not updated.  Need to skip
-  // over all the bytes we just wrote.
-  outputIterator.Next (m_nameCodec.GetSerializedSize ());
+  m_nameCodec->Serialize (m_interest->GetName(), CCNxSchemaV1::T_NAME, outputIterator);
 
   if (m_interest->GetKeyidRestriction ())
     {
-      CCNxTlv::WriteTypeLength (outputIterator, CCNxSchemaV1::T_KEYID_REST, 32);
-      Ptr<CCNxBuffer> b = m_interest->GetKeyidRestriction ()->CreateBuffer ();
-      outputIterator.Write (b->Begin (), b->End ());
+      m_keyIdRestrictionCodec->Serialize(m_interest->GetKeyidRestriction (), CCNxSchemaV1::T_KEYID_REST, outputIterator);
     }
 
   if (m_interest->GetHashRestriction ())
     {
-      CCNxTlv::WriteTypeLength (outputIterator, CCNxSchemaV1::T_HASH_REST, 32);
-      Ptr<CCNxBuffer> b = m_interest->GetHashRestriction ()->CreateBuffer ();
-      outputIterator.Write (b->Begin (), b->End ());
+      m_hashRestrictionCodec->Serialize(m_interest->GetKeyidRestriction (), CCNxSchemaV1::T_HASH_REST, outputIterator);
     }
 
   if (m_interest->GetPayload ())
     {
-      Ptr<CCNxBuffer> payload = m_interest->GetPayload ();
-      CCNxTlv::WriteTypeLength (outputIterator, CCNxSchemaV1::T_PAYLOAD, (uint16_t) payload->GetSize ());
-      outputIterator.Write (payload->Begin (), payload->End ());
+      m_hashRestrictionCodec->Serialize(m_interest->GetPayload (), CCNxSchemaV1::T_PAYLOAD, outputIterator);
     }
 }
 
 uint32_t
-CCNxCodecInterest::Deserialize (Buffer::Iterator inputIterator)
+CCNxHeaderInterest::Deserialize (Buffer::Iterator inputIterator)
 {
   NS_LOG_FUNCTION (this << &inputIterator);
   NS_ASSERT_MSG (inputIterator.GetSize () >= CCNxTlv::GetTLSize (), "Need to have at least 4 bytes to read");
@@ -170,33 +177,52 @@ CCNxCodecInterest::Deserialize (Buffer::Iterator inputIterator)
       Ptr<CCNxHashValue> hashRestr = Ptr<CCNxHashValue> (0);
       Ptr<CCNxBuffer> payload = Ptr<CCNxBuffer> (0);
 
+      const CCNxTypeIdentifier interestTid(CCNxSchemaV1_TID_INTEREST);
+
       while (bytesRead < messageLength)
         {
           uint16_t nestedType = CCNxTlv::ReadType (iterator);
           uint16_t nestedLength = CCNxTlv::ReadLength (iterator);
+
+          // now backup for 4 bytes
+          iterator.Prev(CCNxTlv::GetTLSize());
+
           bytesRead += CCNxTlv::GetTLSize ();
 
           NS_LOG_DEBUG ("Nested  type " << nestedType << " length " << nestedLength << " bytesRead " << bytesRead);
-
           NS_ASSERT_MSG (bytesRead + nestedLength <= messageLength, "length goes beyond end of messageLength");
 
+          size_t bytesRead = 0;
+          CCNxTypeIdentifier nestedTid(interestTid, nestedType);
           switch (nestedType)
             {
             case CCNxSchemaV1::T_NAME:
-              name = DeserializeName (iterator, nestedLength);
-              break;
+              {
+        	Ptr<CCNxField> field = m_nameCodec->Deserialize(iterator, nestedTid, &bytesRead);
+		name = DynamicCast<CCNxName, CCNxField>(field);
+		break;
+              }
 
             case CCNxSchemaV1::T_KEYID_REST:
-              keyidRestr = DeserializeKeyIdRest (iterator, nestedLength);
-              break;
+              {
+        	Ptr<CCNxField> field = m_keyIdRestrictionCodec->Deserialize(iterator, nestedTid, &bytesRead);
+		keyidRestr = DynamicCast<CCNxHashValue, CCNxField>(field);
+		break;
+              }
 
             case CCNxSchemaV1::T_HASH_REST:
-              hashRestr = DeserializeHashRest (iterator, nestedLength);
-              break;
+              {
+        	Ptr<CCNxField> field = m_hashRestrictionCodec->Deserialize(iterator, nestedTid, &bytesRead);
+        	hashRestr = DynamicCast<CCNxHashValue, CCNxField>(field);
+		break;
+              }
 
             case CCNxSchemaV1::T_PAYLOAD:
-              payload = DeserializePayload (iterator, nestedLength);
-              break;
+              {
+        	Ptr<CCNxField> field = m_payloadCodec->Deserialize(iterator, nestedTid, &bytesRead);
+        	payload = DynamicCast<CCNxBuffer, CCNxField>(field);
+		break;
+              }
 
             default:
               NS_ASSERT_MSG (true, "Unknown nested type " << nestedType);
@@ -217,69 +243,69 @@ CCNxCodecInterest::Deserialize (Buffer::Iterator inputIterator)
   return bytesRead + CCNxTlv::GetTLSize ();
 }
 
-Ptr<const CCNxName>
-CCNxCodecInterest::DeserializeName (Buffer::Iterator &start, uint16_t length)
-{
-  NS_LOG_FUNCTION (this << &start);
-
-  /*
-   * The while loop in Deserialize has read the 4 bytes of T and L of the T_NAME
-   * So we need to back up 4 bytes so CCNxCodecName can read the T_NAME and length.
-   */
-  start.Prev (CCNxTlv::GetTLSize ());
-  m_nameCodec.Deserialize (start);
-  NS_LOG_DEBUG ("Deserialized name " << m_nameCodec.GetHeader ());
-
-  // now skip over the name
-  start.Next (length + CCNxTlv::GetTLSize ());
-
-  return m_nameCodec.GetHeader ();
-}
-
-Ptr<CCNxHashValue>
-CCNxCodecInterest::DeserializeKeyIdRest (Buffer::Iterator &start, uint16_t length)
-{
-  NS_LOG_FUNCTION (this << &start);
-
-  // We defined a CCNxHashValue as an 8 byte value plus 24 bytes of padding.
-  NS_ASSERT_MSG (length >= 8, "Must be at least 8 bytes in KeyIdRestriction");
-
-  uint64_t value = start.ReadNtohU64 ();
-  start.Next (length - 8); // skip the padding
-
-  NS_LOG_DEBUG ("Deserialized KeyIdRestr " << value);
-
-  return Create<CCNxHashValue> (value);
-}
-
-Ptr<CCNxHashValue>
-CCNxCodecInterest::DeserializeHashRest (Buffer::Iterator &start, uint16_t length)
-{
-  NS_LOG_FUNCTION (this << &start);
-  NS_ASSERT_MSG (length >= 8, "Must be at least 8 bytes in ObjectHashRestriction");
-
-  uint64_t value = start.ReadNtohU64 ();
-  start.Next (length - 8); // skip the padding
-
-  NS_LOG_DEBUG ("Deserialized ObjectHashRestr " << value);
-  return Create<CCNxHashValue> (value);
-}
-
-Ptr<CCNxBuffer>
-CCNxCodecInterest::DeserializePayload (Buffer::Iterator &start, uint16_t length)
-{
-  NS_LOG_FUNCTION (this << &start);
-
-  Ptr<CCNxBuffer> payload = Create<CCNxBuffer> (0);
-  payload->AddAtStart (length);
-  start.Read (payload->Begin (), length);
-
-  NS_LOG_DEBUG ("Deserialized Payload length " << length);
-  return payload;
-}
+//Ptr<const CCNxName>
+//CCNxHeaderInterest::DeserializeName (Buffer::Iterator &start, uint16_t length)
+//{
+//  NS_LOG_FUNCTION (this << &start);
+//
+//  /*
+//   * The while loop in Deserialize has read the 4 bytes of T and L of the T_NAME
+//   * So we need to back up 4 bytes so CCNxCodecName can read the T_NAME and length.
+//   */
+//  start.Prev (CCNxTlv::GetTLSize ());
+//  m_nameCodec.Deserialize (start);
+//  NS_LOG_DEBUG ("Deserialized name " << m_nameCodec.GetHeader ());
+//
+//  // now skip over the name
+//  start.Next (length + CCNxTlv::GetTLSize ());
+//
+//  return m_nameCodec.GetHeader ();
+//}
+//
+//Ptr<CCNxHashValue>
+//CCNxHeaderInterest::DeserializeKeyIdRest (Buffer::Iterator &start, uint16_t length)
+//{
+//  NS_LOG_FUNCTION (this << &start);
+//
+//  // We defined a CCNxHashValue as an 8 byte value plus 24 bytes of padding.
+//  NS_ASSERT_MSG (length >= 8, "Must be at least 8 bytes in KeyIdRestriction");
+//
+//  uint64_t value = start.ReadNtohU64 ();
+//  start.Next (length - 8); // skip the padding
+//
+//  NS_LOG_DEBUG ("Deserialized KeyIdRestr " << value);
+//
+//  return Create<CCNxHashValue> (value);
+//}
+//
+//Ptr<CCNxHashValue>
+//CCNxHeaderInterest::DeserializeHashRest (Buffer::Iterator &start, uint16_t length)
+//{
+//  NS_LOG_FUNCTION (this << &start);
+//  NS_ASSERT_MSG (length >= 8, "Must be at least 8 bytes in ObjectHashRestriction");
+//
+//  uint64_t value = start.ReadNtohU64 ();
+//  start.Next (length - 8); // skip the padding
+//
+//  NS_LOG_DEBUG ("Deserialized ObjectHashRestr " << value);
+//  return Create<CCNxHashValue> (value);
+//}
+//
+//Ptr<CCNxBuffer>
+//CCNxHeaderInterest::DeserializePayload (Buffer::Iterator &start, uint16_t length)
+//{
+//  NS_LOG_FUNCTION (this << &start);
+//
+//  Ptr<CCNxBuffer> payload = Create<CCNxBuffer> (0);
+//  payload->AddAtStart (length);
+//  start.Read (payload->Begin (), length);
+//
+//  NS_LOG_DEBUG ("Deserialized Payload length " << length);
+//  return payload;
+//}
 
 void
-CCNxCodecInterest::Print (std::ostream &os) const
+CCNxHeaderInterest::Print (std::ostream &os) const
 {
   if (m_interest)
     {
@@ -291,26 +317,25 @@ CCNxCodecInterest::Print (std::ostream &os) const
     }
 }
 
-CCNxCodecInterest::CCNxCodecInterest () : m_interest (0)
+CCNxHeaderInterest::CCNxHeaderInterest () : m_interest (0)
 {
   // empty
 }
 
-CCNxCodecInterest::~CCNxCodecInterest ()
+CCNxHeaderInterest::~CCNxHeaderInterest ()
 {
   // empty (use DoDispose)
 }
 
 Ptr<CCNxInterest>
-CCNxCodecInterest::GetHeader () const
+CCNxHeaderInterest::GetHeader () const
 {
   return m_interest;
 }
 
 void
-CCNxCodecInterest::SetHeader (Ptr<CCNxInterest> interest)
+CCNxHeaderInterest::SetHeader (Ptr<CCNxInterest> interest)
 {
   m_interest = interest;
-  m_nameCodec.SetHeader (m_interest->GetName ());
 }
 

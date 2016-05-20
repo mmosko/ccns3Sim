@@ -60,7 +60,7 @@
 
 #include "ns3/simple-ref-count.h"
 #include "ns3/ccnx-name.h"
-#include "ns3/ccnx-codec-name.h"
+#include "ns3/ccnx-header-name.h"
 
 #include "ns3/nfp-advertise.h"
 #include "ns3/nfp-withdraw.h"
@@ -191,7 +191,7 @@ protected:
   size_t m_capacity;
   size_t m_remaining;
 
-  CCNxCodecName m_routerNameCodec;
+  CCNxHeaderName m_routerNameCodec;
   uint16_t m_msgSeqnum;
 
   uint32_t DeserializeRouterName (Buffer::Iterator const &start, Buffer::Iterator &current);

@@ -59,7 +59,7 @@
 #include "ns3/nfp-message.h"
 #include "ns3/ccnx-name.h"
 #include "ns3/buffer.h"
-#include "ns3/ccnx-codec-name.h"
+#include "ns3/ccnx-header-name.h"
 
 namespace ns3 {
 namespace ccnx {
@@ -117,8 +117,8 @@ public:
   virtual bool Equals (NfpMessage const & other) const;
 
 protected:
-  CCNxCodecName m_anchorNameCodec;
-  CCNxCodecName m_prefixCodec;
+  CCNxHeaderName m_anchorNameCodec;
+  CCNxHeaderName m_prefixCodec;
 };
 
 bool operator == (const Ptr<const NfpWithdraw> a, const Ptr<const NfpWithdraw> b);

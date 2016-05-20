@@ -55,6 +55,7 @@
 
 #include <stdlib.h>
 
+#include "ns3/assert.h"
 #include "ccnx-type-identifier.h"
 
 using namespace ns3;
@@ -63,17 +64,20 @@ using namespace ns3::ccnx;
 CCNxTypeIdentifier::CCNxTypeIdentifier (CCNxTypeIdentifier::IdentiferType value)
 {
   m_components.push_back(value);
+  std::cout << "CCNxTypeIdentifier value: " << GetTid() << std::endl;
 }
 
 CCNxTypeIdentifier::CCNxTypeIdentifier (const CCNxTypeIdentifier::CCNxTypeIdentifier &parent)
 {
   m_components = parent.m_components;
+  std::cout << "CCNxTypeIdentifier copy: " << parent.GetTid() << " to "<< GetTid() << std::endl;
 }
 
 CCNxTypeIdentifier::CCNxTypeIdentifier (const CCNxTypeIdentifier &parent, CCNxTypeIdentifier::IdentiferType value)
 {
   m_components = parent.m_components;
   m_components.push_back(value);
+  std::cout << "CCNxTypeIdentifier append: " << parent.GetTid() << " to "<< GetTid() << std::endl;
 }
 
 CCNxTypeIdentifier::CCNxTypeIdentifier (const std::string tid)
@@ -164,4 +168,11 @@ CCNxTypeIdentifier::operator [] (size_t offset) const
 {
   NS_ASSERT_MSG(offset < size(), "Component " << offset << " beyond size " << size());
   return m_components[offset];
+}
+
+std::ostream &
+ns3::ccnx::operator << (std::ostream &os, const CCNxTypeIdentifier &tid)
+{
+  os << tid.GetTid();
+  return os;
 }

@@ -80,8 +80,9 @@ CCNxCodecRegistry::PerHopLookupCodec(TlvTypeType tlvType)
 }
 
 void
-CCNxCodecRegistry::RegisterTidCodec(CCNxTypeIdentifier tlvType, Ptr<CCNxCodec> codec)
+CCNxCodecRegistry::RegisterTidCodec(CCNxTypeIdentifier tlvType, Ptr<CCNxFieldCodec> codec)
 {
+  std::cout << "Registering " << tlvType << std::endl;
   m_tidRegistry.Register(tlvType, codec);
 }
 
@@ -91,7 +92,7 @@ CCNxCodecRegistry::UnregisterTidCodec(CCNxTypeIdentifier tlvType)
   m_tidRegistry.UnRegister(tlvType);
 }
 
-Ptr<CCNxCodec>
+Ptr<CCNxFieldCodec>
 CCNxCodecRegistry::LookupTidCodec(CCNxTypeIdentifier tlvType)
 {
   return m_tidRegistry.Lookup(tlvType);

@@ -53,78 +53,69 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
-#define CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
+#include "ns3/test.h"
+#include "ns3/ccnx-codec-hashvalue.h"
+#include "ns3/ccnx-schema-v1.h"
+#include "ns3/ccnx-codec-registry.h"
 
-#include "ns3/ccnx-field-codec.h"
-#include "ns3/ccnx-type-identifier.h"
-#include "ns3/ccnx-type-registry.h"
-#include "ns3/ccnx-codec-perhopheaderentry.h"
+#include "../../TestMacros.h"
 
-namespace ns3 {
-namespace ccnx {
+using namespace ns3;
+using namespace ns3::ccnx;
 
-  /**
-   * Registry of the codecs for each message element.  This allows a user to override a codec or
-   * supply a new codec for a new TLV field.
-   *
-   * Per hop headers are a simple list, so the registry is only a single TLV type.
-   *
-   * CCNxMessages are a hierarchical listing of TLV type.  Therefore, they must be specified as a list.
-   * For example, the Name codec of an Interest is ".1.0" because an Interest is TLV type "1" and a Name is
-   * TLV type "0".  The list can be specified as a string (like the previous exampe) or as a std::vector of
-   * uint32_t.
-   *
-   * N.B. Only Per Hop headers are currently implemented
-   */
-class CCNxCodecRegistry
+// =================================
+
+namespace TestCCNxCodecHashValue {
+
+BeginTest (RegisterCodec)
+{
+  Ptr<CCNxCodecHashValue> x = CreateObject<CCNxCodecHashValue>();
+
+  static const char * _tidStrings[] = {
+      CCNxSchemaV1_TID_INTEREST_KEYIDREST,
+      CCNxSchemaV1_TID_INTEREST_HASHREST,
+      NULL
+  };
+
+  for (int i = 0; _tidStrings[i] != NULL; ++i) {
+      Ptr<CCNxFieldCodec> codec = CCNxCodecRegistry::LookupTidCodec(CCNxTypeIdentifier(_tidStrings[i]));
+      bool exists = (codec);
+      NS_TEST_EXPECT_MSG_EQ(exists, true, "Missing codec for " << _tidStrings[i]);
+      NS_TEST_EXPECT_MSG_EQ(codec->GetInstanceTypeId(), CCNxCodecHashValue::GetTypeId(), "Incorrect codec for " << _tidStrings[i]);
+  }
+}
+EndTest ()
+
+BeginTest (GetSerializeSize)
+{
+}
+EndTest ()
+
+BeginTest (Serialize)
+{
+}
+EndTest ()
+
+BeginTest (Deserialize)
+{
+}
+EndTest ()
+
+/**
+ * \ingroup ccnx-test
+ *
+ * \brief Test Suite for CCNxCodecHashValue
+ */
+static class TestSuiteCCNxCodecHashValue : public TestSuite
 {
 public:
-  virtual ~CCNxCodecRegistry ();
+  TestSuiteCCNxCodecHashValue () : TestSuite ("ccnx-codec-hashvalue", UNIT)
+  {
+    AddTestCase (new RegisterCodec (), TestCase::QUICK);
+    AddTestCase (new GetSerializeSize (), TestCase::QUICK);
+    AddTestCase (new Serialize (), TestCase::QUICK);
+    AddTestCase (new Deserialize (), TestCase::QUICK);
+  }
+} g_TestSuiteCCNxCodecHashValue;
 
-  typedef uint32_t TlvTypeType;
-
-  /**
-   * Create a mapping between TLV type and codec
-   */
-  static void PerHopRegisterCodec(TlvTypeType tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec);
-
-  /**
-   * Remove a mapping for a TLV type.  To update a registry, you must first unregister it,
-   * then call the register method.
-   */
-  static void PerHopUnegisterCodec(TlvTypeType tlvType);
-
-  /**
-   * Lookup the codec for a TLV type appearing in the list of per hop headers.
-   *
-   * @param [in] tlvType
-   * @return Ptr<>(0) If no match
-   * @return non-null If tlv type matched, returns the codec to use
-   */
-  static Ptr<CCNxCodecPerHopHeaderEntry> PerHopLookupCodec(TlvTypeType tlvType);
-
-  // ========
-  // CCNx Message & Validation Registry
-
-  static void RegisterTidCodec(const CCNxTypeIdentifier tid, Ptr<CCNxFieldCodec> codec);
-  static void UnregisterTidCodec(const CCNxTypeIdentifier tid);
-  static Ptr<CCNxFieldCodec> LookupTidCodec(const CCNxTypeIdentifier tid);
-
-protected:
-  /**
-   * All static class, so hide constructor
-   */
-  CCNxCodecRegistry ();
-
-  typedef CCNxTypeRegistry< TlvTypeType, CCNxCodecPerHopHeaderEntry > PerHopRegistryType;
-  static PerHopRegistryType m_perHopRegistry;
-
-  typedef CCNxTypeRegistry< CCNxTypeIdentifier, CCNxFieldCodec > TidRegistryType;
-  static TidRegistryType m_tidRegistry;
-};
-
-} /* namespace ccnx */
-} /* namespace ns3 */
-
-#endif /* CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_ */
+} // namespace TestCCNxCodecHashValue

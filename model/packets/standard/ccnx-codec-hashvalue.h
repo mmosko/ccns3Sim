@@ -53,78 +53,36 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
-#define CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
+#ifndef CCNS3SIM_MODEL_PACKETS_STANDARD_CCNX_CODEC_HASHVALUE_H_
+#define CCNS3SIM_MODEL_PACKETS_STANDARD_CCNX_CODEC_HASHVALUE_H_
 
 #include "ns3/ccnx-field-codec.h"
-#include "ns3/ccnx-type-identifier.h"
-#include "ns3/ccnx-type-registry.h"
-#include "ns3/ccnx-codec-perhopheaderentry.h"
 
-namespace ns3 {
-namespace ccnx {
-
-  /**
-   * Registry of the codecs for each message element.  This allows a user to override a codec or
-   * supply a new codec for a new TLV field.
-   *
-   * Per hop headers are a simple list, so the registry is only a single TLV type.
-   *
-   * CCNxMessages are a hierarchical listing of TLV type.  Therefore, they must be specified as a list.
-   * For example, the Name codec of an Interest is ".1.0" because an Interest is TLV type "1" and a Name is
-   * TLV type "0".  The list can be specified as a string (like the previous exampe) or as a std::vector of
-   * uint32_t.
-   *
-   * N.B. Only Per Hop headers are currently implemented
-   */
-class CCNxCodecRegistry
+namespace ns3
 {
-public:
-  virtual ~CCNxCodecRegistry ();
+  namespace ccnx
+  {
 
-  typedef uint32_t TlvTypeType;
+    class CCNxCodecHashValue : public CCNxFieldCodec
+    {
+    public:
+      CCNxCodecHashValue ();
+      virtual ~CCNxCodecHashValue ();
 
-  /**
-   * Create a mapping between TLV type and codec
-   */
-  static void PerHopRegisterCodec(TlvTypeType tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec);
+      static TypeId GetTypeId ();
 
-  /**
-   * Remove a mapping for a TLV type.  To update a registry, you must first unregister it,
-   * then call the register method.
-   */
-  static void PerHopUnegisterCodec(TlvTypeType tlvType);
+      virtual TypeId GetInstanceTypeId () const;
 
-  /**
-   * Lookup the codec for a TLV type appearing in the list of per hop headers.
-   *
-   * @param [in] tlvType
-   * @return Ptr<>(0) If no match
-   * @return non-null If tlv type matched, returns the codec to use
-   */
-  static Ptr<CCNxCodecPerHopHeaderEntry> PerHopLookupCodec(TlvTypeType tlvType);
+      virtual Ptr<CCNxField> Deserialize (Buffer::Iterator &input, const CCNxTypeIdentifier &parent, size_t *bytesRead);
 
-  // ========
-  // CCNx Message & Validation Registry
+      virtual uint32_t GetSerializedSize (Ptr<const CCNxField> packetElement);
 
-  static void RegisterTidCodec(const CCNxTypeIdentifier tid, Ptr<CCNxFieldCodec> codec);
-  static void UnregisterTidCodec(const CCNxTypeIdentifier tid);
-  static Ptr<CCNxFieldCodec> LookupTidCodec(const CCNxTypeIdentifier tid);
+      virtual void Serialize (Ptr<const CCNxField> packetElement, uint16_t tlvType, Buffer::Iterator &output);
 
-protected:
-  /**
-   * All static class, so hide constructor
-   */
-  CCNxCodecRegistry ();
+      virtual void Print (Ptr<const CCNxField> packetElement, std::ostream &os) const;
+    };
 
-  typedef CCNxTypeRegistry< TlvTypeType, CCNxCodecPerHopHeaderEntry > PerHopRegistryType;
-  static PerHopRegistryType m_perHopRegistry;
-
-  typedef CCNxTypeRegistry< CCNxTypeIdentifier, CCNxFieldCodec > TidRegistryType;
-  static TidRegistryType m_tidRegistry;
-};
-
-} /* namespace ccnx */
+  } /* namespace ccnx */
 } /* namespace ns3 */
 
-#endif /* CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_ */
+#endif /* CCNS3SIM_MODEL_PACKETS_STANDARD_CCNX_CODEC_HASHVALUE_H_ */

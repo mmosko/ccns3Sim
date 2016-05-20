@@ -8,7 +8,8 @@
 #ifndef CCNS3SIM_MODEL_MESSAGES_CCNX_FIELD_H_
 #define CCNS3SIM_MODEL_MESSAGES_CCNX_FIELD_H_
 
-#include "ns3/object.h"
+#include <ostream>
+#include "ns3/simple-ref-count.h"
 
 namespace ns3
 {
@@ -18,14 +19,14 @@ namespace ns3
     /**
      * Abstract base class for all fields in a CCNx Packet
      */
-    class CCNxField : public Object
+    class CCNxField : public SimpleRefCount<CCNxField>
     {
     public:
       CCNxField ();
       virtual ~CCNxField ();
 
-      static TypeId GetTypeId();
-
+//      static TypeId GetTypeId();
+//
       virtual std::ostream & Print(std::ostream &os) const = 0;
     };
 

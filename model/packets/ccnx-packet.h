@@ -66,7 +66,7 @@
 #include "ns3/ccnx-hash-value.h"
 
 #include "ns3/ccnx-codec-fixedheader.h"
-#include "ns3/ccnx-codec-interest.h"
+#include "ns3/ccnx-header-interest.h"
 #include "ns3/ccnx-codec-contentobject.h"
 #include "ns3/ccnx-signer.h"
 #include "ns3/ccnx-codec-perhopheader.h"
@@ -208,7 +208,7 @@ protected:
   void TrimNs3Packet ();
 
   CCNxCodecFixedHeader m_codecFixedHeader;
-  CCNxCodecInterest m_codecInterest;
+  CCNxHeaderInterest m_headerInterest;
   CCNxCodecContentObject m_codecContentObject;
   CCNxCodecPerHopHeader m_codecPerHopHeader;
 

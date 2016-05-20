@@ -167,6 +167,25 @@ BeginTest (Constructor_Operator_Equals)
 }
 EndTest ()
 
+BeginTest (Constructor_Operator_NotEquals)
+{
+  CCNxTypeIdentifier a("5.7.99.1000");
+  CCNxTypeIdentifier b("5.7.99.1000");
+  CCNxTypeIdentifier c("5.7.99.1000");
+
+  CCNxTypeIdentifier x("5.7.99");
+  CCNxTypeIdentifier y("5.7.99.1000.2000");
+  CCNxTypeIdentifier z("5.7.77.1000");
+
+  NS_TEST_EXPECT_MSG_EQ((a != b), false, "a == b");
+  NS_TEST_EXPECT_MSG_EQ((b != c), false, "b == c");
+  NS_TEST_EXPECT_MSG_EQ((c != a), false, "c == a");
+
+  NS_TEST_EXPECT_MSG_EQ((a != x), true, "a != x");
+  NS_TEST_EXPECT_MSG_EQ((a != y), true, "a != y");
+  NS_TEST_EXPECT_MSG_EQ((a != z), true, "a != z");
+}
+EndTest ()
 
 /**
  * @ingroup ccnx-test
@@ -186,6 +205,7 @@ public:
     AddTestCase (new Constructor_GetTid_Multiple (), TestCase::QUICK);
     AddTestCase (new Constructor_Operator_Less (), TestCase::QUICK);
     AddTestCase (new Constructor_Operator_Equals (), TestCase::QUICK);
+    AddTestCase (new Constructor_Operator_NotEquals (), TestCase::QUICK);
   }
 } g_TestSuiteCCNxTypeIdentifier;
 

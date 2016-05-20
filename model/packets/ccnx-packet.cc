@@ -187,7 +187,7 @@ CCNxPacket::ComputePacketSize () const
   if ( messageType == CCNxMessage::Interest)
     {
       Ptr<CCNxInterest> interest = DynamicCast<CCNxInterest, CCNxMessage> (m_message);
-      CCNxCodecInterest codec;
+      CCNxHeaderInterest codec;
       codec.SetHeader (interest);
       length += codec.GetSerializedSize ();
 
@@ -222,8 +222,8 @@ CCNxPacket::GenerateNs3Packet ()
   if ( messageType == CCNxMessage::Interest)
     {
       Ptr<CCNxInterest> interest = DynamicCast<CCNxInterest, CCNxMessage> (m_message);
-      m_codecInterest.SetHeader (interest);
-      p->AddHeader (m_codecInterest);
+      m_headerInterest.SetHeader (interest);
+      p->AddHeader (m_headerInterest);
 
     }
   else if (messageType == CCNxMessage::ContentObject)
@@ -352,9 +352,9 @@ CCNxPacket::Deserialize ()
     {
     case CCNxFixedHeaderType_Interest:
       {
-        uint32_t msgSize = copy->RemoveHeader (m_codecInterest);
+        uint32_t msgSize = copy->RemoveHeader (m_headerInterest);
         NS_LOG_DEBUG ("Deserialize: interest = " << msgSize);
-        m_message = m_codecInterest.GetHeader ();
+        m_message = m_headerInterest.GetHeader ();
         break;
       }
     case CCNxFixedHeaderType_Object:

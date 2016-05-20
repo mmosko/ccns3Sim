@@ -59,7 +59,6 @@
 
 #include "ns3/nfp-anchor-advertisement.h"
 #include "ns3/ccnx-name.h"
-#include "ns3/ccnx-codec-name.h"
 #include "ns3/ccnx-tlv.h"
 #include "../../mockups/mockup_ccnx-virtual-connection.h"
 

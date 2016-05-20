@@ -61,7 +61,7 @@
 #include <string>
 #include <memory>
 
-#include "ns3/simple-ref-count.h"
+#include "ns3/ccnx-field.h"
 #include "ns3/output-stream-wrapper.h"
 
 #include "ccnx-namesegment.h"
@@ -79,7 +79,7 @@ namespace ccnx {
  *
  * Each name segment has a type and a value.
  */
-class CCNxName : public SimpleRefCount<CCNxName>
+class CCNxName : public CCNxField
 {
 public:
   friend class CCNxNameBuilder;
@@ -152,6 +152,8 @@ public:
    * @return
    */
   bool IsPrefixOf (const CCNxName &other) const;
+
+  virtual std::ostream & Print(std::ostream &os) const;
 
 protected:
   /**

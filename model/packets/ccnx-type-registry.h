@@ -94,7 +94,7 @@ public:
    */
   void Register(TlvType tlvType, Ptr<RegistryClass> registeredClass)
   {
-    NS_ASSERT_MSG(m_registry[tlvType] == 0, "Can't overwrite the registered class for type " << tlvType);
+    NS_ASSERT_MSG(m_registry.find(tlvType) == m_registry.end(), "Can't overwrite the registered class for type " << tlvType);
     m_registry[tlvType] = registeredClass;
   }
 

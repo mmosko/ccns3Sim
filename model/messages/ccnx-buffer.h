@@ -57,7 +57,7 @@
 #ifndef CCNS3SIM_CCNXBUFFER_H
 #define CCNS3SIM_CCNXBUFFER_H
 
-#include "ns3/simple-ref-count.h"
+#include "ns3/ccnx-field.h"
 #include "ns3/buffer.h"
 #include "ns3/ptr.h"
 
@@ -70,7 +70,7 @@ namespace ccnx {
  * Similar signatures to ns3::Buffer, but inherits from SimpleRefCount so we can
  * pass it around with a Ptr.
  */
-class CCNxBuffer : public SimpleRefCount<CCNxBuffer>
+class CCNxBuffer : public CCNxField
 {
 public:
   /**
@@ -130,6 +130,8 @@ public:
    * are exactly equal.
    */
   bool Equals (CCNxBuffer const &other) const;
+
+  virtual std::ostream & Print(std::ostream &os) const;
 
 private:
   Buffer m_data;

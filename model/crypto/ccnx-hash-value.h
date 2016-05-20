@@ -57,7 +57,7 @@
 #define CCNS3SIM_CCNXHASHVALUE_H
 
 #include "ns3/ptr.h"
-#include "ns3/simple-ref-count.h"
+#include "ns3/ccnx-field.h"
 #include "ns3/ccnx-byte-array.h"
 
 namespace ns3 {
@@ -71,7 +71,7 @@ namespace ccnx {
  * We use a uint64_t for all hash values, even if they are things like SHA256.
  * In general, we fake all crypto routines.
  */
-class CCNxHashValue : public SimpleRefCount<CCNxHashValue>
+class CCNxHashValue : public CCNxField
 {
 public:
   /**
@@ -123,6 +123,8 @@ public:
    */
   CCNxHashValue (Ptr<const CCNxByteArray> value);
 
+  virtual ~CCNxHashValue();
+
   /**
    * For purposes of simulation, it is usually sufficient to treat hash values as
    * a uint64_t.  This function returns the first 8 bytes of the hash value.
@@ -154,6 +156,8 @@ public:
    * @return false if this hash value is not less than the other hash value
    */
   bool operator < (const CCNxHashValue &other) const;
+
+  virtual std::ostream & Print(std::ostream &os) const;
 
 private:
   void InitializeFromInteger (uint64_t value, size_t length);

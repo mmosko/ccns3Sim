@@ -54,7 +54,7 @@
  */
 
 #include "ns3/test.h"
-#include "ns3/ccnx-codec-interest.h"
+#include "ns3/ccnx-header-interest.h"
 #include "../../TestMacros.h"
 
 using namespace ns3;
@@ -73,7 +73,7 @@ CreatePayload (size_t length, const uint8_t *bytes)
   return payload;
 }
 
-namespace TestCCNxCodecInterest {
+namespace TestCCNxHeaderInterest {
 
 BeginTest (TestGetSerializedSize)
 {
@@ -85,7 +85,7 @@ BeginTest (TestGetSerializedSize)
   Ptr<CCNxBuffer> payload = CreatePayload (sizeof(payloadBytes), payloadBytes);
 
   Ptr<CCNxInterest> interest = Create<CCNxInterest> (name, payload, keyid, hash);
-  CCNxCodecInterest ci;
+  CCNxHeaderInterest ci;
   ci.SetHeader (interest);
 
   // expected size = 4 + 29 (name) + 36 + 36 + 4 (payload TLV) + payloadBytes
@@ -106,7 +106,7 @@ BeginTest (TestSerialize)
   Ptr<CCNxBuffer> payload = CreatePayload (sizeof(payloadBytes), payloadBytes);
 
   Ptr<CCNxInterest> interest = Create<CCNxInterest> (name, payload, keyid, hash);
-  CCNxCodecInterest ci;
+  CCNxHeaderInterest ci;
   ci.SetHeader (interest);
 
   Buffer buffer (0);
@@ -158,7 +158,7 @@ BeginTest (TestDeserialize)
   Ptr<CCNxBuffer> payload = CreatePayload (sizeof(payloadBytes), payloadBytes);
 
   Ptr<CCNxInterest> interest = Create<CCNxInterest> (name, payload, keyid, hash);
-  CCNxCodecInterest ci;
+  CCNxHeaderInterest ci;
   ci.SetHeader (interest);
 
   Buffer buffer (0);
@@ -166,7 +166,7 @@ BeginTest (TestDeserialize)
   ci.Serialize (buffer.Begin ());
 
   // now de-serialize and compare
-  CCNxCodecInterest citest;
+  CCNxHeaderInterest citest;
   citest.Deserialize (buffer.Begin ());
 
   Ptr<CCNxInterest> test = citest.GetHeader ();
@@ -183,16 +183,16 @@ EndTest ()
 /**
  * \ingroup ccnx-test
  *
- * \brief Test Suite for CCNxCodecInterest
+ * \brief Test Suite for CCNxHeaderInterest
  */
-static class TestSuiteCCNxCodecInterest : public TestSuite
+static class TestSuiteCCNxHeaderInterest : public TestSuite
 {
 public:
-  TestSuiteCCNxCodecInterest () : TestSuite ("ccnx-codec-interest", UNIT)
+  TestSuiteCCNxHeaderInterest () : TestSuite ("ccnx-header-interest", UNIT)
   {
-    AddTestCase (new TestCCNxCodecInterest::TestGetSerializedSize (), TestCase::QUICK);
-    AddTestCase (new TestCCNxCodecInterest::TestSerialize (), TestCase::QUICK);
-    AddTestCase (new TestCCNxCodecInterest::TestDeserialize (), TestCase::QUICK);
+    AddTestCase (new TestCCNxHeaderInterest::TestGetSerializedSize (), TestCase::QUICK);
+    AddTestCase (new TestCCNxHeaderInterest::TestSerialize (), TestCase::QUICK);
+    AddTestCase (new TestCCNxHeaderInterest::TestDeserialize (), TestCase::QUICK);
   }
-} g_TestSuiteCCNxCodecInterest;
+} g_TestSuiteCCNxHeaderInterest;
 

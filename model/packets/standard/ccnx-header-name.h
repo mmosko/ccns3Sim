@@ -53,78 +53,78 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
-#define CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
+#ifndef CCNS3SIM_CCNXHEADERNAME_H
+#define CCNS3SIM_CCNXHEADERNAME_H
 
-#include "ns3/ccnx-field-codec.h"
-#include "ns3/ccnx-type-identifier.h"
-#include "ns3/ccnx-type-registry.h"
-#include "ns3/ccnx-codec-perhopheaderentry.h"
+#include <ns3/header.h>
+#include <ns3/ccnx-name.h>
 
 namespace ns3 {
 namespace ccnx {
 
-  /**
-   * Registry of the codecs for each message element.  This allows a user to override a codec or
-   * supply a new codec for a new TLV field.
-   *
-   * Per hop headers are a simple list, so the registry is only a single TLV type.
-   *
-   * CCNxMessages are a hierarchical listing of TLV type.  Therefore, they must be specified as a list.
-   * For example, the Name codec of an Interest is ".1.0" because an Interest is TLV type "1" and a Name is
-   * TLV type "0".  The list can be specified as a string (like the previous exampe) or as a std::vector of
-   * uint32_t.
-   *
-   * N.B. Only Per Hop headers are currently implemented
-   */
-class CCNxCodecRegistry
+/**
+ * \ingroup ccns-packet
+ *
+ * While this codec is written as a Header subclass, it is not intended
+ * for independent use as a packet header.  It is written this way so it
+ * is uniform with the other Codecs.
+ *
+ * It is called from within the Interest and ContentObject Codec.
+ *
+ *
+ */
+class CCNxHeaderName : public Header
 {
 public:
-  virtual ~CCNxCodecRegistry ();
+  // virtual from Object (really Chunk)
 
-  typedef uint32_t TlvTypeType;
+  static TypeId GetTypeId (void);
+
+  virtual TypeId GetInstanceTypeId (void) const;
+
+  // virtual from Header
+
+  virtual uint32_t GetSerializedSize (void) const;
+
+  virtual void Serialize (Buffer::Iterator start) const;
+
+  virtual uint32_t Deserialize (Buffer::Iterator start);
+
+  virtual void Print (std::ostream &os) const;
+
+  // subclass
+  CCNxHeaderName ();
+
+  virtual ~CCNxHeaderName ();
 
   /**
-   * Create a mapping between TLV type and codec
+   * Get the name that was Deserialized.
    */
-  static void PerHopRegisterCodec(TlvTypeType tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec);
+  Ptr<const CCNxName> GetHeader () const;
 
   /**
-   * Remove a mapping for a TLV type.  To update a registry, you must first unregister it,
-   * then call the register method.
+   * Set the name to be serialized
    */
-  static void PerHopUnegisterCodec(TlvTypeType tlvType);
+  void SetHeader (Ptr<const CCNxName> name);
 
   /**
-   * Lookup the codec for a TLV type appearing in the list of per hop headers.
+   * Determines if two name codecs are equal.
    *
-   * @param [in] tlvType
-   * @return Ptr<>(0) If no match
-   * @return non-null If tlv type matched, returns the codec to use
+   * To be equal, the name codecs must have equal names.
+   *
+   * @param other The CCNxNameCodec to campare against
+   * @return true if equal, false otherwise.
    */
-  static Ptr<CCNxCodecPerHopHeaderEntry> PerHopLookupCodec(TlvTypeType tlvType);
+  bool Equals (CCNxHeaderName const & other) const;
 
-  // ========
-  // CCNx Message & Validation Registry
+private:
+  Ptr<const CCNxName> m_name;
 
-  static void RegisterTidCodec(const CCNxTypeIdentifier tid, Ptr<CCNxFieldCodec> codec);
-  static void UnregisterTidCodec(const CCNxTypeIdentifier tid);
-  static Ptr<CCNxFieldCodec> LookupTidCodec(const CCNxTypeIdentifier tid);
-
-protected:
-  /**
-   * All static class, so hide constructor
-   */
-  CCNxCodecRegistry ();
-
-  typedef CCNxTypeRegistry< TlvTypeType, CCNxCodecPerHopHeaderEntry > PerHopRegistryType;
-  static PerHopRegistryType m_perHopRegistry;
-
-  typedef CCNxTypeRegistry< CCNxTypeIdentifier, CCNxFieldCodec > TidRegistryType;
-  static TidRegistryType m_tidRegistry;
+  static uint16_t NameSegmentTypeToSchemaValue (CCNxNameSegmentType type);
+  static CCNxNameSegmentType SchemaValueToNameSegmentType (uint16_t type);
 };
 
-} /* namespace ccnx */
-} /* namespace ns3 */
+}
+}
 
-#endif /* CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_ */
+#endif //CCNS3SIM_CCNXHEADERNAME_H

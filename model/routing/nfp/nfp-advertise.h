@@ -59,7 +59,7 @@
 #include "ns3/buffer.h"
 #include "ns3/simple-ref-count.h"
 #include "ns3/ccnx-name.h"
-#include "ns3/ccnx-codec-name.h"
+#include "ns3/ccnx-header-name.h"
 
 #include "ns3/nfp-message.h"
 
@@ -130,8 +130,8 @@ public:
   virtual bool Equals (NfpMessage const & other) const;
 
 protected:
-  CCNxCodecName m_anchorNameCodec;
-  CCNxCodecName m_prefixCodec;
+  CCNxHeaderName m_anchorNameCodec;
+  CCNxHeaderName m_prefixCodec;
 
   uint32_t m_anchorSeqnum;
   uint16_t m_distance;
