@@ -95,7 +95,7 @@ public:
   /**
    * Removes all elements of the vector
    */
-  void clear();
+  void clear(void);
 
   /**
    * Returns the CCNxPerHopHeaderEntry at the given index
@@ -111,6 +111,22 @@ public:
    * @param [in] The index from which CCNxPerHopHeaderEntry needs to be removed
    */
   void RemoveHeader(size_t index);
+
+  /**
+   * Determines if all perhopheaders are equivalent to the given perhopheaders.
+   *
+   * Two perhopheaders are equivalent if each per hop header entry is exactly equal
+   * and in same order
+   */
+  bool Equals (const Ptr<CCNxPerHopHeader> other) const;
+
+  /**
+   * Determines if all perhopheaders are equivalent to the given perhopheaders.
+   *
+   * Two perhopheaders are equivalent if each per hop header entry is exactly equal
+   * and in same order
+   */
+  bool Equals (CCNxPerHopHeader const &other) const;
 
   /**
    * Typedef defining a vector of CCNxPerHopHeaderEntry

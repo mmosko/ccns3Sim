@@ -177,13 +177,10 @@ BeginTest (TestDeserialize)
 EndTest ()
 }
 
-// =================================
-// Finally, define the TestSuite
-
 /**
- * \ingroup ccnx-test
+ * @ingroup ccnx-test
  *
- * \brief Test Suite for CCNxHeaderInterest
+ * Test Suite for CCNxHeaderInterest
  */
 static class TestSuiteCCNxHeaderInterest : public TestSuite
 {

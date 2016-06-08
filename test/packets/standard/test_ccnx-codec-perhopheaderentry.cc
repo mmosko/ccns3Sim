@@ -55,6 +55,7 @@
 
 #include "ns3/test.h"
 #include "ns3/ccnx-codec-perhopheaderentry.h"
+#include "ns3/ccnx-codec-interestlifetime.h"
 
 #include "../../TestMacros.h"
 
@@ -65,6 +66,9 @@ namespace TestSuiteCCNxCodecPerHopHeaderEntry {
 
 BeginTest (Constructor)
 {
+  Ptr<CCNxCodecInterestLifetime> codec = CreateObject<CCNxCodecInterestLifetime>();
+  bool exists = (codec);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
 }
 EndTest()
 
